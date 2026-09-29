@@ -2,24 +2,34 @@ import { Link } from "react-router";
 import TrailCard from "../components/TrailCard.jsx";
 import heroImage from "../assets/images/hero-ordesa.jpg";
 
+//Constantes
 const featuredTrails = [
   {
     id: 1,
     name: "Valle de Ordesa",
+    location: "Huesca · Aragón",
     distance: "12,4 km",
     duration: "3 h 30 min",
+    difficulty: "Media",
+    image: heroImage,
   },
   {
     id: 2,
     name: "Ibón de Plan",
+    location: "Huesca · Aragón",
     distance: "14 km",
     duration: "4 h",
+    difficulty: "Media",
+    image: null,
   },
   {
     id: 3,
     name: "Ruta de las Cascadas",
+    location: "Pirineo Aragonés",
     distance: "9,8 km",
     duration: "2 h 45 min",
+    difficulty: "Fácil",
+    image: heroImage,
   },
 ];
 
@@ -66,7 +76,7 @@ function Home() {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {featuredTrails.map((trail) => (
-            <TrailCard key={trail.id} name={trail.name} distance={trail.distance} duration={trail.duration} />
+            <TrailCard key={trail.id} name={trail.name} location={trail.location} distance={trail.distance} duration={trail.duration} difficulty={trail.difficulty} image={trail.image} />
           ))}
         </div>
       </section>

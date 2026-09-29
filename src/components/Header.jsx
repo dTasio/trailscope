@@ -5,6 +5,7 @@ function Header() {
   //States
   const [menuOpen, setMenuOpen] = useState(false);
 
+  //Funciones
   const closeMenu = () => {
     setMenuOpen(false);
   };
