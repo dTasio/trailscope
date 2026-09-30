@@ -11,29 +11,29 @@ function Header() {
   };
 
   return (
-    <header className="border-b border-border bg-background">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <Link to="/" className="text-xl font-bold tracking-tight text-primary">
+    <header className="border-b border-border bg-surface">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+        <Link to="/" className="rounded-lg px-3 py-2 text-2xl font-bold tracking-tight text-primary">
           TrailScope
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
-          <Link to="/explore" className="text-sm font-medium text-text transition-colors hover:text-primary">
+          <Link to="/explore" className="rounded-lg px-4 py-3 font-medium text-text transition-colors hover:text-primary">
             Explorar
           </Link>
         </nav>
 
         <div className="hidden items-center gap-4 md:flex">
-          <Link to="/login" className="text-sm font-medium text-text transition-colors hover:text-primary">
+          <Link to="/login" className="rounded-lg px-4 py-3 font-medium text-text transition-colors hover:text-primary">
             Iniciar sesión
           </Link>
 
-          <Link to="/register" className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-dark">
+          <Link to="/register" className="rounded-full bg-primary px-5 py-2.5 font-semibold text-white transition-colors hover:bg-primary-dark">
             Registrarse
           </Link>
         </div>
 
-        <button type="button" className="text-sm font-medium text-text md:hidden" aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"} aria-expanded={menuOpen} onClick={() => setMenuOpen((prevMenuOpen) => !prevMenuOpen)}>
+        <button type="button" className="font-medium text-text md:hidden" aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"} aria-expanded={menuOpen} onClick={() => setMenuOpen((prevMenuOpen) => !prevMenuOpen)}>
           {menuOpen ? "Cerrar" : "Menú"}
         </button>
       </div>
