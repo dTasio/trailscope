@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import TrailCard from "../components/TrailCard.jsx";
+import PlaceCard from "../components/PlaceCard.jsx";
 import heroImage from "../assets/images/hero-ordesa.jpg";
 
 //Constantes
@@ -30,6 +31,30 @@ const featuredTrails = [
     duration: "2 h 45 min",
     difficulty: "Fácil",
     image: heroImage,
+  },
+];
+
+const featuredPlaces = [
+  {
+    id: 1,
+    name: "Cola de Caballo",
+    type: "Cascada",
+    location: "Ordesa · Huesca",
+    altitude: "1.760 m",
+  },
+  {
+    id: 2,
+    name: "Ibón de Plan",
+    type: "Lago",
+    location: "Valle de Chistau · Huesca",
+    altitude: "1.910 m",
+  },
+  {
+    id: 3,
+    name: "Mirador de Calcilarruego",
+    type: "Mirador",
+    location: "Ordesa · Huesca",
+    altitude: "1.950 m",
   },
 ];
 
@@ -78,6 +103,24 @@ function Home() {
           {featuredTrails.map((trail) => (
             <TrailCard key={trail.id} name={trail.name} location={trail.location} distance={trail.distance} duration={trail.duration} difficulty={trail.difficulty} image={trail.image} />
           ))}
+        </div>
+      </section>
+
+      <section className="bg-surface-secondary">
+        <div className="mx-auto max-w-7xl px-6 py-16">
+          <div className="mb-8">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Lugares naturales</p>
+
+            <h2 className="mt-3 text-3xl font-bold tracking-tight text-text">Lugares que merece la pena descubrir</h2>
+
+            <p className="mt-3 max-w-2xl text-muted">Descubre cascadas, lagos, miradores y otros espacios naturales.</p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {featuredPlaces.map((place) => (
+              <PlaceCard key={place.id} name={place.name} type={place.type} location={place.location} altitude={place.altitude} />
+            ))}
+          </div>
         </div>
       </section>
     </main>
