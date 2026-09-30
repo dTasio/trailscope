@@ -1,10 +1,11 @@
-import { Route, Routes } from 'react-router'
+import { Route, Routes } from "react-router";
 
-import Header from './components/Header.jsx'
-import Home from './pages/Home.jsx'
-import Explore from './pages/Explore.jsx'
-import Login from './pages/Login.jsx'
-import Register from './pages/Register.jsx'
+import Header from "./components/Header.jsx";
+import Home from "./pages/Home.jsx";
+import Explore from "./pages/Explore.jsx";
+import Login from "./pages/Login.jsx";
+import Register from "./pages/Register.jsx";
+import Footer from "./components/Footer.jsx";
 
 function App() {
   return (
@@ -17,8 +18,10 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
       </Routes>
+
+      <Footer />
     </>
-  )
+  );
 }
 
-export default App
+export default App;

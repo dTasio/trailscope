@@ -1,75 +1,83 @@
 import { Link } from "react-router";
+import HeroSection from "../components/home/HeroSection.jsx";
+import FeaturedTrailsSection from "../components/home/FeaturedTrailsSection.jsx";
+import FeaturedPlacesSection from "../components/home/FeaturedPlacesSection.jsx";
+import MapPreviewSection from "../components/home/MapPreviewSection.jsx";
+import TripPlanningSection from "../components/home/TripPlanningSection.jsx";
+import FinalCTASection from "../components/home/FinalCTASection.jsx";
 import TrailCard from "../components/TrailCard.jsx";
+import PlaceCard from "../components/PlaceCard.jsx";
 import heroImage from "../assets/images/hero-ordesa.jpg";
 
+//Constantes
 const featuredTrails = [
   {
     id: 1,
     name: "Valle de Ordesa",
+    location: "Huesca · Aragón",
     distance: "12,4 km",
     duration: "3 h 30 min",
+    difficulty: "Media",
+    image: heroImage,
   },
   {
     id: 2,
     name: "Ibón de Plan",
+    location: "Huesca · Aragón",
     distance: "14 km",
     duration: "4 h",
+    difficulty: "Media",
+    image: null,
   },
   {
     id: 3,
     name: "Ruta de las Cascadas",
+    location: "Pirineo Aragonés",
     distance: "9,8 km",
     duration: "2 h 45 min",
+    difficulty: "Fácil",
+    image: heroImage,
+  },
+];
+
+const featuredPlaces = [
+  {
+    id: 1,
+    name: "Cola de Caballo",
+    type: "Cascada",
+    location: "Ordesa · Huesca",
+    altitude: "1.760 m",
+  },
+  {
+    id: 2,
+    name: "Ibón de Plan",
+    type: "Lago",
+    location: "Valle de Chistau · Huesca",
+    altitude: "1.910 m",
+  },
+  {
+    id: 3,
+    name: "Mirador de Calcilarruego",
+    type: "Mirador",
+    location: "Ordesa · Huesca",
+    altitude: "1.950 m",
   },
 ];
 
 function Home() {
   return (
     <main>
-      <section className="mx-auto grid max-w-7xl items-center gap-12 px-6 py-16 lg:grid-cols-2 lg:py-24">
-        <div className="max-w-xl">
-          <p className="mb-5 text-sm font-semibold uppercase tracking-[0.18em] text-primary">Rutas · Naturaleza · Escapadas</p>
+      <HeroSection />
 
-          <h1 className="text-4xl font-bold leading-tight tracking-tight text-text sm:text-5xl lg:text-6xl">Descubre lugares que merece la pena recorrer.</h1>
+      <FeaturedTrailsSection trails={featuredTrails} />
 
-          <p className="mt-6 max-w-lg text-lg leading-8 text-muted">Explora rutas y espacios naturales, consulta información útil y prepara tu próxima escapada.</p>
+      <FeaturedPlacesSection places={featuredPlaces} />
 
-          <Link to="/explore" className="mt-8 inline-flex rounded-full bg-primary px-6 py-3 font-semibold text-white transition-colors hover:bg-primary-dark">
-            Explorar rutas
-          </Link>
-        </div>
+      <MapPreviewSection />
 
-        <div className="relative min-h-105 overflow-hidden rounded-2xl lg:min-h-140">
-          <img src={heroImage} alt="Paisaje montañoso en el entorno de Ordesa" className="h-full min-h-105 w-full object-cover lg:min-h-140" />
-          <div className="absolute bottom-5 left-5 right-5 rounded-xl bg-white/90 p-5 shadow-lg backdrop-blur-sm sm:right-auto sm:max-w-xs">
-            <p className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">Ruta destacada</p>
+      <TripPlanningSection />
 
-            <h2 className="mt-2 text-xl font-bold text-text">Valle de Ordesa</h2>
-
-            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted">
-              <span>12,4 km</span>
-              <span>3 h 30 min</span>
-              <span>Dificultad media</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-6 py-16">
-        <div className="mb-8">
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Descubre</p>
-
-          <h2 className="mt-3 text-3xl font-bold tracking-tight text-text">Rutas destacadas</h2>
-
-          <p className="mt-3 max-w-2xl text-muted">Explora algunas rutas para inspirar tu próxima escapada.</p>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {featuredTrails.map((trail) => (
-            <TrailCard key={trail.id} name={trail.name} distance={trail.distance} duration={trail.duration} />
-          ))}
-        </div>
-      </section>
+      <FinalCTASection />
     </main>
   );
 }
