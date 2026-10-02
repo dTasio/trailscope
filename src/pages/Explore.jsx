@@ -1,5 +1,6 @@
 import { useState } from "react";
 import ExploreMap from "../components/explore/ExploreMap.jsx";
+import ExploreResults from "../components/explore/ExploreResults.jsx";
 import { getHikingTrails } from "../services/trailsService.js";
 
 function Explore() {
@@ -10,9 +11,19 @@ function Explore() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const [selectedTrailId, setSelectedTrailId] = useState(null);
+
   //Funciones
-  const handleSearchArea = async (bounds) => {
+  const handleSearchArea = async (bounds, zoom) => {
+    if (zoom < 9) {
+      setTrails([]);
+      setSelectedTrailId(null);
+      setError("Acércate un poco más en el mapa para buscar rutas en esta zona.");
+      return;
+    }
+
     setSearchBounds(bounds);
+    setSelectedTrailId(null);
     setIsLoading(true);
     setError(null);
 
@@ -36,33 +47,13 @@ function Explore() {
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-text sm:text-4xl">Explora rutas y lugares naturales.</h1>
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-border">
-          <ExploreMap onSearchArea={handleSearchArea} />
+        <div className="grid overflow-hidden rounded-2xl border border-border bg-surface lg:grid-cols-[380px_1fr]">
+          <div className="max-h-162.5 overflow-y-auto border-b border-border lg:border-r lg:border-b-0">
+            <ExploreResults trails={trails} isLoading={isLoading} error={error} selectedTrailId={selectedTrailId} onSelectTrail={setSelectedTrailId} />
+          </div>
+
+          <ExploreMap trails={trails} selectedTrailId={selectedTrailId} onSearchArea={handleSearchArea} />
         </div>
-
-        {isLoading && <p className="mt-6 text-muted">Buscando rutas...</p>}
-
-        {error && (
-          <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4">
-            <p className="text-sm text-red-700">{error}</p>
-          </div>
-        )}
-
-        {!isLoading && !error && trails.length > 0 && (
-          <div className="mt-6">
-            <p className="font-semibold text-text">{trails.length} rutas encontradas</p>
-
-            <div className="mt-4 flex flex-col gap-3">
-              {trails.map((trail) => (
-                <div key={trail.id} className="rounded-xl border border-border bg-surface p-4">
-                  <p className="font-semibold text-text">{trail.name}</p>
-
-                  {trail.distance && <p className="mt-1 text-sm text-muted">Distancia: {trail.distance}</p>}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </section>
     </main>
   );
