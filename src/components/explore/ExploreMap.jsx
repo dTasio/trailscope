@@ -1,21 +1,32 @@
 import { useEffect, useRef } from "react";
-import { Map, Marker, NavigationControl, setWorkerUrl } from "maplibre-gl";
-
+import { Map, Marker, NavigationControl, setWorkerUrl, LngLatBounds } from "maplibre-gl";
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-const MIN_SEARCH_ZOOM = 9;
-
+// Configura el worker que MapLibre necesita para funcionar con Vite
 setWorkerUrl(workerUrl);
 
-function ExploreMap({ trails, selectedTrailId, onSearchArea }) {
-  //Referencias
-  const mapContainer = useRef(null);
-  const map = useRef(null);
+// Colores para diferenciar los tipos de lugares en el mapa
+const PLACE_MARKER_COLORS = {
+  waterfall: "#3b82f6",
+  viewpoint: "#c58b55",
+  lake: "#06b6d4",
+};
 
-  const markers = useRef([]);
+function ExploreMap({ trails, places, selectedTrailId, onSearchArea, onSelectTrail }) {
+  // --------------------------------------------------
+  // REFERENCIAS
+  // --------------------------------------------------
+  const mapContainer = useRef(null); //Contenedor donde se dibuja el mapa
+  const map = useRef(null); //Instancia de MapLibre entre renders
 
-  //Effects
+  const trailMarkers = useRef([]);
+  const placeMarkers = useRef([]);
+
+  // --------------------------------------------------
+  // CREACIÓN DEL MAPA
+  // --------------------------------------------------
+
   // Crea y destruye la instancia principal del mapa
   useEffect(() => {
     if (map.current) return;
@@ -27,8 +38,10 @@ function ExploreMap({ trails, selectedTrailId, onSearchArea }) {
       zoom: 5,
     });
 
+    //Controles de zoom y navegacion
     map.current.addControl(new NavigationControl(), "top-right");
 
+    // Source GeoJSON donde almacenamos las rutas encontradas
     map.current.on("load", () => {
       map.current.addSource("trail-routes", {
         type: "geojson",
@@ -38,6 +51,7 @@ function ExploreMap({ trails, selectedTrailId, onSearchArea }) {
         },
       });
 
+      // Capa visual de las rutas normales
       map.current.addLayer({
         id: "trail-routes-line",
         type: "line",
@@ -55,11 +69,31 @@ function ExploreMap({ trails, selectedTrailId, onSearchArea }) {
         },
       });
 
+      // Capa invisible que facilita el clic
+      map.current.addLayer({
+        id: "trail-routes-hitbox",
+        type: "line",
+        source: "trail-routes",
+
+        layout: {
+          "line-cap": "round",
+          "line-join": "round",
+        },
+
+        paint: {
+          "line-color": "#000000",
+          "line-width": 14,
+          "line-opacity": 0,
+        },
+      });
+
+      // Capa visual de la ruta seleccionada
       map.current.addLayer({
         id: "trail-route-selected",
         type: "line",
         source: "trail-routes",
 
+        // Inicialmente no coincide con ninguna ruta
         filter: ["==", ["get", "id"], -1],
 
         layout: {
@@ -75,13 +109,18 @@ function ExploreMap({ trails, selectedTrailId, onSearchArea }) {
       });
     });
 
+    // Cleanup: destruye el mapa cuando se desmonta el componente
     return () => {
       map.current?.remove();
       map.current = null;
     };
   }, []);
 
-  // Actualiza los marcadores cuando cambia el array de rutas
+  // --------------------------------------------------
+  // MARKERS DE LAS RUTAS
+  // --------------------------------------------------
+
+  // Crea un marker en el centro de cada ruta cada vez que cambia el array de trails
   useEffect(() => {
     if (!map.current) return;
 
@@ -91,14 +130,20 @@ function ExploreMap({ trails, selectedTrailId, onSearchArea }) {
         return new Marker().setLngLat([trail.center.longitude, trail.center.latitude]).addTo(map.current);
       });
 
-    markers.current = newMarkers;
+    trailMarkers.current = newMarkers;
 
+    // Elimina los markers anteriores
     return () => {
-      markers.current.forEach((marker) => marker.remove());
-      markers.current = [];
+      trailMarkers.current.forEach((marker) => marker.remove());
+      trailMarkers.current = [];
     };
   }, [trails]);
 
+  // --------------------------------------------------
+  // GEOMETRÍA DE LAS RUTAS
+  // --------------------------------------------------
+
+  // Convierte las rutas de React a GeoJSON y actualiza la source que utiliza MapLibre para dibujarlas
   useEffect(() => {
     if (!map.current) return;
 
@@ -123,9 +168,15 @@ function ExploreMap({ trails, selectedTrailId, onSearchArea }) {
         })),
     };
 
+    // Sustituye los datos anteriores por las nuevas rutas
     source.setData(geojson);
   }, [trails]);
 
+  // --------------------------------------------------
+  // RUTA SELECCIONADA
+  // --------------------------------------------------
+
+  // Actualiza el filtro de MapLibre para destacar solamente la ruta que está seleccionada
   useEffect(() => {
     if (!map.current) return;
 
@@ -136,7 +187,115 @@ function ExploreMap({ trails, selectedTrailId, onSearchArea }) {
     map.current.setFilter("trail-route-selected", ["==", ["get", "id"], selectedTrailId ?? -1]);
   }, [selectedTrailId]);
 
-  //Funciones
+  // --------------------------------------------------
+  // INTERACCIÓN CON LAS RUTAS DEL MAPA
+  // --------------------------------------------------
+
+  // Permite seleccionar una ruta haciendo clic directamente sobre su recorrido y cambia el cursor al pasar por encima
+  useEffect(() => {
+    if (!map.current) return;
+
+    const handleMouseEnter = () => {
+      map.current.getCanvas().style.cursor = "pointer";
+    };
+
+    const handleMouseLeave = () => {
+      map.current.getCanvas().style.cursor = "";
+    };
+
+    const handleTrailClick = (event) => {
+      // Obtiene la ruta GeoJSON situada bajo el cursor
+      const feature = event.features?.[0];
+
+      if (!feature) return;
+
+      const trailId = feature.properties?.id;
+
+      if (trailId == null) return;
+
+      // Comunica a Explore qué ruta ha sido seleccionada
+      onSelectTrail(Number(trailId));
+    };
+
+    // Eventos sobre la capa invisible de interacción
+    map.current.on("click", "trail-routes-hitbox", handleTrailClick);
+    map.current.on("mouseenter", "trail-routes-hitbox", handleMouseEnter);
+    map.current.on("mouseleave", "trail-routes-hitbox", handleMouseLeave);
+
+    // Cleanup: elimina los listeners anteriores
+    return () => {
+      map.current?.off("click", "trail-routes-hitbox", handleTrailClick);
+      map.current?.off("mouseenter", "trail-routes-hitbox", handleMouseEnter);
+      map.current?.off("mouseleave", "trail-routes-hitbox", handleMouseLeave);
+    };
+  }, [onSelectTrail]);
+
+  // --------------------------------------------------
+  // ENCUADRE AUTOMÁTICO DE LA RUTA
+  // --------------------------------------------------
+
+  // Cuando cambia la ruta seleccionada, calcula sus límites y ajusta automáticamente el mapa para mostrarla completa
+  useEffect(() => {
+    if (!map.current || selectedTrailId === null) return;
+
+    // Busca el objeto completo de la ruta seleccionada
+    const selectedTrail = trails.find((trail) => trail.id === selectedTrailId);
+
+    if (!selectedTrail?.geometry) return;
+
+    // Objeto donde acumulamos los límites geográficos
+    const bounds = new LngLatBounds();
+
+    // Añade todas las coordenadas de la ruta a los bounds
+    selectedTrail.geometry.coordinates.flat().forEach((coordinate) => {
+      bounds.extend(coordinate);
+    });
+
+    if (bounds.isEmpty()) return;
+
+    // Centra y ajusta el zoom para mostrar toda la ruta
+    map.current.fitBounds(bounds, {
+      padding: 80,
+      duration: 800,
+      maxZoom: 14,
+    });
+  }, [selectedTrailId, trails]);
+
+  // --------------------------------------------------
+  // MARKERS DE LUGARES NATURALES
+  // --------------------------------------------------
+
+  // Crea los markers de lugares cada vez que cambia el array de places
+  useEffect(() => {
+    if (!map.current) return;
+
+    const newPlaceMarkers = places
+      .filter((place) => place.coordinates)
+      .map((place) => {
+        const markerColor = getPlaceMarkerColor(place.type);
+
+        return new Marker({
+          color: markerColor,
+        })
+          .setLngLat([place.coordinates.longitude, place.coordinates.latitude])
+          .addTo(map.current);
+      });
+
+    placeMarkers.current = newPlaceMarkers;
+
+    // Elimina los markers antiguos
+    return () => {
+      placeMarkers.current.forEach((marker) => marker.remove());
+
+      placeMarkers.current = [];
+    };
+  }, [places]);
+
+  // --------------------------------------------------
+  // FUNCIONES
+  // --------------------------------------------------
+
+  // Obtiene la zona visible y el zoom actual del mapa y los envía a Explore para realizar la búsqueda
   const handleSearchArea = () => {
     if (!map.current) return;
 
@@ -153,6 +312,15 @@ function ExploreMap({ trails, selectedTrailId, onSearchArea }) {
     onSearchArea(searchArea, zoom);
   };
 
+  // Devuelve el color correspondiente a cada tipo de lugar
+  function getPlaceMarkerColor(type) {
+    return PLACE_MARKER_COLORS[type] ?? "#2f5d50";
+  }
+
+  // --------------------------------------------------
+  // INTERFAZ REACT SOBRE EL MAPA
+  // --------------------------------------------------
+
   return (
     <div className="relative h-150 w-full">
       <div ref={mapContainer} className="h-full w-full" />
@@ -160,6 +328,29 @@ function ExploreMap({ trails, selectedTrailId, onSearchArea }) {
       <button type="button" onClick={handleSearchArea} className="absolute top-4 left-4 z-10 rounded-full bg-surface px-5 py-3 font-semibold text-text shadow-lg transition hover:bg-surface-secondary">
         Buscar en esta zona
       </button>
+
+      {places.length > 0 && (
+        <div className="absolute bottom-4 left-4 z-10 rounded-xl border border-border bg-surface/95 p-4 shadow-lg">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.12em] text-muted">Lugares</p>
+
+          <div className="flex flex-col gap-2 text-sm text-text">
+            <div className="flex items-center gap-2">
+              <span className="h-3 w-3 rounded-full bg-blue-500" />
+              Cascadas
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="h-3 w-3 rounded-full bg-amber-600" />
+              Miradores
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="h-3 w-3 rounded-full bg-cyan-500" />
+              Lagos
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

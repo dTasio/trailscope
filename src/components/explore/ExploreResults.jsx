@@ -1,4 +1,22 @@
+import { useEffect, useRef } from "react";
+
 function ExploreResults({ trails, isLoading, error, selectedTrailId, onSelectTrail }) {
+  const trailRefs = useRef(new Map());
+
+  //Effects
+  useEffect(() => {
+    if (selectedTrailId === null) return;
+
+    const selectedCard = trailRefs.current.get(selectedTrailId);
+
+    if (!selectedCard) return;
+
+    selectedCard.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+    });
+  }, [selectedTrailId]);
+
   if (isLoading) {
     return (
       <div className="p-6">
@@ -36,7 +54,20 @@ function ExploreResults({ trails, isLoading, error, selectedTrailId, onSelectTra
           const isSelected = trail.id === selectedTrailId;
 
           return (
-            <button key={trail.id} type="button" onClick={() => onSelectTrail(trail.id)} className={`w-full rounded-xl border p-4 text-left transition ${isSelected ? "border-primary bg-surface-secondary" : "border-border bg-surface hover:border-primary"}`}>
+            <button
+              key={trail.id}
+              ref={(element) => {
+                if (element) {
+                  trailRefs.current.set(trail.id, element);
+                } else {
+                  trailRefs.current.delete(trail.id);
+                }
+              }}
+              type="button"
+              aria-pressed={isSelected}
+              onClick={() => onSelectTrail(trail.id)}
+              className={`w-full rounded-xl border p-4 text-left transition ${isSelected ? "border-primary bg-surface-secondary" : "border-border bg-surface hover:border-primary"}`}
+            >
               <p className="font-semibold text-text">{trail.name}</p>
 
               <p className="mt-2 text-sm text-muted">
