@@ -1,5 +1,4 @@
-// Endpoint público de Overpass para consultar datos de OpenStreetMap
-const OVERPASS_API_URL = "https://overpass-api.de/api/interpreter";
+import { runOverpassQuery } from "./overpassClient";
 
 const MIN_TRAIL_DISTANCE_KM = 1;
 const MAX_TRAIL_DISTANCE_KM = 30;
@@ -92,29 +91,8 @@ export async function getHikingTrails(bounds) {
     out body geom 30;
   `;
 
-  // Enviamos la consulta a Overpass
-  const response = await fetch(OVERPASS_API_URL, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/x-www-form-urlencoded",
-  },
-  body: new URLSearchParams({
-    data: query,
-  }),
-});
-
-if (!response.ok) {
-  if (response.status === 504) {
-    throw new Error(
-      "El servicio de rutas está tardando demasiado en responder. Prueba de nuevo en unos segundos o busca en una zona más pequeña."
-    );
-  }
-
-  throw new Error("No se han podido consultar las rutas.");
-}
-
-// Convertimos la respuesta a JavaScript
-const data = await response.json();
+  // Ejecuta la consulta utilizando el cliente común de Overpass
+  const data = await runOverpassQuery(query);
 
 // Transformamos Overpass al formato utilizado por TrailScope
 return data.elements

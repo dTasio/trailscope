@@ -1,65 +1,100 @@
 import { useState } from "react";
+
 import ExploreMap from "../components/explore/ExploreMap.jsx";
-import ExploreResults from "../components/explore/ExploreResults.jsx";
-import { getHikingTrails } from "../services/trailsService.js";
-import { getNaturalPlaces } from "../services/placesService.js";
+import TrailResults from "../components/explore/TrailsResults.jsx";
 import PlacesResults from "../components/explore/PlacesResults.jsx";
 
-function Explore() {
-  //States
-  const [searchBounds, setSearchBounds] = useState(null);
+import { getHikingTrails } from "../services/trailsService.js";
+import { getNaturalPlaces } from "../services/placesService.js";
 
+// Zoom mínimo para permitir búsquedas en el mapa
+const MIN_SEARCH_ZOOM = 9;
+
+function Explore() {
+  // --------------------------------------------------
+  // ESTADOS
+  // --------------------------------------------------
+
+  // Resultados obtenidos de las búsquedas
   const [trails, setTrails] = useState([]);
+  const [places, setPlaces] = useState([]);
+
+  // Controlan el estado de las peticiones a las APIs
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const [places, setPlaces] = useState([]);
-
+  // Guardan qué ruta o lugar está seleccionado actualmente
   const [selectedTrailId, setSelectedTrailId] = useState(null);
+  const [selectedPlaceKey, setSelectedPlaceKey] = useState(null);
 
+  // Contenido que explora el usuario
   const [contentType, setContentType] = useState("trails");
 
-  //Funciones
+  // --------------------------------------------------
+  // CAMBIO DE TIPO DE CONTENIDO
+  // --------------------------------------------------
+
+  // Cambia entre rutas y lugares y limpia los resultados
   const handleContentTypeChange = (type) => {
+    // Evita borrar los resultados si se pulsa el modo que ya está seleccionado
+    if (type === contentType) return;
+
     setContentType(type);
 
     setTrails([]);
     setPlaces([]);
 
     setSelectedTrailId(null);
+    setSelectedPlaceKey(null);
+
     setError(null);
   };
 
+  // --------------------------------------------------
+  // BÚSQUEDA EN LA ZONA VISIBLE DEL MAPA
+  // --------------------------------------------------
+
+  // Recibe los límites y el zoom desde ExploreMap
+  // Según el modo activo, consulta rutas o lugares naturales
   const handleSearchArea = async (bounds, zoom) => {
-    if (zoom < 9) {
+    // Evita consultas demasiado grandes a Overpass
+    if (zoom < MIN_SEARCH_ZOOM) {
       setTrails([]);
       setPlaces([]);
+
       setSelectedTrailId(null);
+      setSelectedPlaceKey(null);
+
+      setIsLoading(false);
 
       setError("Acércate un poco más en el mapa para buscar en esta zona.");
 
       return;
     }
 
-    setSearchBounds(bounds);
+    // Limpiamos los resultados y selecciones de la búsqueda anterior
+    setTrails([]);
+    setPlaces([]);
+
+    // Cada nueva búsqueda elimina la selección anterior
     setSelectedTrailId(null);
+    setSelectedPlaceKey(null);
 
     setIsLoading(true);
     setError(null);
 
+    // Busca rutas o lugares segun el modo
     try {
       if (contentType === "trails") {
         const hikingTrails = await getHikingTrails(bounds);
 
         setTrails(hikingTrails);
-        setPlaces([]);
       }
 
       if (contentType === "places") {
         const naturalPlaces = await getNaturalPlaces(bounds);
 
         setPlaces(naturalPlaces);
-        setTrails([]);
       }
     } catch (error) {
       setError(error.message);
@@ -68,6 +103,9 @@ function Explore() {
     }
   };
 
+  // --------------------------------------------------
+  // INTERFAZ
+  // --------------------------------------------------
   return (
     <main>
       <section className="mx-auto max-w-7xl px-6 py-8">
@@ -88,11 +126,23 @@ function Explore() {
         </div>
 
         <div className="grid overflow-hidden rounded-2xl border border-border bg-surface lg:grid-cols-[380px_1fr]">
-          <div className="max-h-162.5 overflow-y-auto border-b border-border lg:border-r lg:border-b-0">
-            {contentType === "trails" ? <ExploreResults trails={trails} isLoading={isLoading} error={error} selectedTrailId={selectedTrailId} onSelectTrail={setSelectedTrailId} /> : <PlacesResults places={places} isLoading={isLoading} error={error} />}
+          <div className="h-150 overflow-y-auto border-b border-border lg:border-r lg:border-b-0">
+            {contentType === "trails" ? (
+              <TrailResults trails={trails} isLoading={isLoading} error={error} selectedTrailId={selectedTrailId} onSelectTrail={setSelectedTrailId} />
+            ) : (
+              <PlacesResults places={places} isLoading={isLoading} error={error} selectedPlaceKey={selectedPlaceKey} onSelectPlace={setSelectedPlaceKey} />
+            )}
           </div>
 
-          <ExploreMap trails={contentType === "trails" ? trails : []} places={contentType === "places" ? places : []} selectedTrailId={selectedTrailId} onSearchArea={handleSearchArea} onSelectTrail={setSelectedTrailId} />
+          <ExploreMap
+            trails={contentType === "trails" ? trails : []}
+            places={contentType === "places" ? places : []}
+            selectedTrailId={selectedTrailId}
+            selectedPlaceKey={selectedPlaceKey}
+            onSearchArea={handleSearchArea}
+            onSelectTrail={setSelectedTrailId}
+            onSelectPlace={setSelectedPlaceKey}
+          />
         </div>
       </section>
     </main>

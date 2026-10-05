@@ -1,6 +1,4 @@
-// Endpoint público de Overpass para consultar datos de OpenStreetMap
-const OVERPASS_API_URL =
-  "https://overpass-api.de/api/interpreter";
+import { runOverpassQuery } from "./overpassClient";
 
 // Determina qué categoría de TrailScope corresponde a un elemento de OSM
 function getPlaceType(tags = {}) {
@@ -74,30 +72,8 @@ export async function getNaturalPlaces(bounds) {
     out body center 50;
   `;
 
-  const response = await fetch(OVERPASS_API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type":
-        "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({
-      data: query,
-    }),
-  });
-
-  if (!response.ok) {
-    if (response.status === 504) {
-      throw new Error(
-        "El servicio de lugares está tardando demasiado en responder. Prueba de nuevo en unos segundos o busca en una zona más pequeña."
-      );
-    }
-
-    throw new Error(
-      "No se han podido consultar los lugares naturales."
-    );
-  }
-
-  const data = await response.json();
+  // Ejecuta la consulta utilizando el cliente común de Overpass
+  const data = await runOverpassQuery(query);
 
   return data.elements
     .map((element) => {
@@ -111,11 +87,10 @@ export async function getNaturalPlaces(bounds) {
         id: element.id,
         osmType: element.type,
 
-        name:
-          element.tags?.name?.trim() || null,
+        osmKey: `${element.type}-${element.id}`,
 
+        name: element.tags?.name?.trim() || null,
         type,
-
         coordinates,
 
         description:
@@ -129,7 +104,7 @@ export async function getNaturalPlaces(bounds) {
 
         wikipedia:
           element.tags?.wikipedia ?? null,
-      };
+    };
     })
     .filter(
       (place) =>

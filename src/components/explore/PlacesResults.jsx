@@ -1,4 +1,21 @@
-function PlacesResults({ places, isLoading, error }) {
+import { useEffect, useRef } from "react";
+
+function PlacesResults({ places, isLoading, error, selectedPlaceKey, onSelectPlace }) {
+  // Guarda una referencia a cada card para poder localizarla cuando el lugar se selecciona desde el mapa
+  const placeCardRefs = useRef(new Map());
+
+  // Desplaza el panel hasta la card correspondiente cuando se selecciona un lugar
+  useEffect(() => {
+    if (selectedPlaceKey === null) return;
+
+    const selectedCard = placeCardRefs.current.get(selectedPlaceKey);
+
+    selectedCard.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+    });
+  }, [selectedPlaceKey]);
+
   if (isLoading) {
     return (
       <div className="p-6">
@@ -43,15 +60,32 @@ function PlacesResults({ places, isLoading, error }) {
       <p className="font-semibold text-text">{places.length} lugares encontrados</p>
 
       <div className="mt-5 flex flex-col gap-3">
-        {places.map((place) => (
-          <article key={`${place.osmType}-${place.id}`} className="rounded-xl border border-border bg-surface p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">{getPlaceTypeLabel(place.type)}</p>
+        {places.map((place) => {
+          const isSelected = place.osmKey === selectedPlaceKey;
 
-            <h3 className="mt-2 font-semibold text-text">{place.name}</h3>
+          return (
+            <button
+              key={place.osmKey}
+              ref={(element) => {
+                if (element) {
+                  placeCardRefs.current.set(place.osmKey, element);
+                } else {
+                  placeCardRefs.current.delete(place.osmKey);
+                }
+              }}
+              type="button"
+              aria-pressed={isSelected}
+              onClick={() => onSelectPlace(place.osmKey)}
+              className={`w-full rounded-xl border p-4 text-left transition ${isSelected ? "border-primary bg-surface-secondary" : "border-border bg-surface hover:border-primary"}`}
+            >
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">{getPlaceTypeLabel(place.type)}</p>
 
-            {place.elevation && <p className="mt-2 text-sm text-muted">Altitud: {place.elevation} m</p>}
-          </article>
-        ))}
+              <h3 className="mt-2 font-semibold text-text">{place.name}</h3>
+
+              {place.elevation && <p className="mt-2 text-sm text-muted">Altitud: {place.elevation} m</p>}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

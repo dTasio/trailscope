@@ -13,7 +13,7 @@ const PLACE_MARKER_COLORS = {
   lake: "#06b6d4",
 };
 
-function ExploreMap({ trails, places, selectedTrailId, onSearchArea, onSelectTrail }) {
+function ExploreMap({ trails, places, selectedTrailId, selectedPlaceKey, onSearchArea, onSelectTrail, onSelectPlace }) {
   // --------------------------------------------------
   // REFERENCIAS
   // --------------------------------------------------
@@ -266,6 +266,7 @@ function ExploreMap({ trails, places, selectedTrailId, onSearchArea, onSelectTra
   // --------------------------------------------------
 
   // Crea los markers de lugares cada vez que cambia el array de places
+  // Asigna su color, destaca el lugar seleccionado, permite seleccionarlos con clic y elimina los markers anteriores.
   useEffect(() => {
     if (!map.current) return;
 
@@ -274,22 +275,68 @@ function ExploreMap({ trails, places, selectedTrailId, onSearchArea, onSelectTra
       .map((place) => {
         const markerColor = getPlaceMarkerColor(place.type);
 
-        return new Marker({
+        const isSelected = place.osmKey === selectedPlaceKey;
+
+        const marker = new Marker({
           color: markerColor,
+          scale: isSelected ? 1.45 : 1,
         })
           .setLngLat([place.coordinates.longitude, place.coordinates.latitude])
           .addTo(map.current);
+
+        const markerElement = marker.getElement();
+
+        if (isSelected) {
+          markerElement.style.filter = "drop-shadow(0 0 8px rgba(23, 32, 28, 0.85))";
+
+          markerElement.style.zIndex = "10";
+        } else {
+          markerElement.style.filter = "";
+          markerElement.style.zIndex = "";
+        }
+
+        markerElement.style.cursor = "pointer";
+
+        markerElement.addEventListener("click", () => {
+          onSelectPlace(place.osmKey);
+        });
+
+        return marker;
       });
 
     placeMarkers.current = newPlaceMarkers;
 
-    // Elimina los markers antiguos
     return () => {
       placeMarkers.current.forEach((marker) => marker.remove());
 
       placeMarkers.current = [];
     };
-  }, [places]);
+  }, [places, selectedPlaceKey, onSelectPlace]);
+
+  // --------------------------------------------------
+  // ENCUADRE DEL LUGAR SELECCIONADO
+  // --------------------------------------------------
+
+  // Centra y acerca el mapa al lugar seleccionado cuando cambia la selección
+  useEffect(() => {
+    if (!map.current || selectedPlaceKey === null) {
+      return;
+    }
+
+    const selectedPlace = places.find((place) => place.osmKey === selectedPlaceKey);
+
+    if (!selectedPlace?.coordinates) return;
+
+    const currentZoom = map.current.getZoom();
+
+    const targetZoom = Math.max(currentZoom, 14);
+
+    map.current.flyTo({
+      center: [selectedPlace.coordinates.longitude, selectedPlace.coordinates.latitude],
+      zoom: targetZoom,
+      duration: 800,
+    });
+  }, [selectedPlaceKey, places]);
 
   // --------------------------------------------------
   // FUNCIONES

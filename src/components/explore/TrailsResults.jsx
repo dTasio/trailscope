@@ -1,13 +1,14 @@
 import { useEffect, useRef } from "react";
 
-function ExploreResults({ trails, isLoading, error, selectedTrailId, onSelectTrail }) {
-  const trailRefs = useRef(new Map());
+function TrailsResults({ trails, isLoading, error, selectedTrailId, onSelectTrail }) {
+  // Guarda una referencia a cada card para poder localizarla cuando la ruta se selecciona desde el mapa
+  const trailCardRefs = useRef(new Map());
 
-  //Effects
+  // Desplaza el panel hasta la card correspondiente cuando se selecciona una ruta
   useEffect(() => {
     if (selectedTrailId === null) return;
 
-    const selectedCard = trailRefs.current.get(selectedTrailId);
+    const selectedCard = trailCardRefs.current.get(selectedTrailId);
 
     if (!selectedCard) return;
 
@@ -58,9 +59,9 @@ function ExploreResults({ trails, isLoading, error, selectedTrailId, onSelectTra
               key={trail.id}
               ref={(element) => {
                 if (element) {
-                  trailRefs.current.set(trail.id, element);
+                  trailCardRefs.current.set(trail.id, element);
                 } else {
-                  trailRefs.current.delete(trail.id);
+                  trailCardRefs.current.delete(trail.id);
                 }
               }}
               type="button"
@@ -85,4 +86,4 @@ function ExploreResults({ trails, isLoading, error, selectedTrailId, onSelectTra
   );
 }
 
-export default ExploreResults;
+export default TrailsResults;
