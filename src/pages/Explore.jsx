@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 import ExploreMap from "../components/explore/ExploreMap.jsx";
-import TrailResults from "../components/explore/TrailsResults.jsx";
+import TrailsResults from "../components/explore/TrailsResults.jsx";
 import PlacesResults from "../components/explore/PlacesResults.jsx";
 
 import { getHikingTrails } from "../services/trailsService.js";
@@ -29,6 +29,9 @@ function Explore() {
 
   // Contenido que explora el usuario
   const [contentType, setContentType] = useState("trails");
+
+  // Referencia al bloque del mapa para poder volver a él desde una card en la versión móvil
+  const mapSectionRef = useRef(null);
 
   // --------------------------------------------------
   // CAMBIO DE TIPO DE CONTENIDO
@@ -104,11 +107,36 @@ function Explore() {
   };
 
   // --------------------------------------------------
+  // REALIZAR SCROLL AL MAPA EN VERSION MOVIL
+  // --------------------------------------------------
+
+  const handleSelectTrail = (trailId) => {
+    setSelectedTrailId(trailId);
+
+    if (window.innerWidth < 768) {
+      mapSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  };
+  const handleSelectPlace = (placeKey) => {
+    setSelectedPlaceKey(placeKey);
+
+    if (window.innerWidth < 768) {
+      mapSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  };
+
+  // --------------------------------------------------
   // INTERFAZ
   // --------------------------------------------------
   return (
     <main>
-      <section className="mx-auto max-w-7xl px-6 py-8">
+      <section className="mx-auto max-w-7xl px-6 pt-8 pb-20 lg:pb-24">
         <div className="mb-6">
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">Explorar</p>
 
@@ -125,24 +153,28 @@ function Explore() {
           </button>
         </div>
 
-        <div className="grid overflow-hidden rounded-2xl border border-border bg-surface lg:grid-cols-[380px_1fr]">
-          <div className="h-150 overflow-y-auto border-b border-border lg:border-r lg:border-b-0">
+        <div className="flex flex-col overflow-hidden rounded-2xl border border-border md:grid md:grid-cols-[minmax(320px,40%)_1fr]">
+          {/* RESULTADOS */}
+          <div className="order-2 bg-surface md:order-1 md:h-150 md:overflow-y-auto md:border-r md:border-border">
             {contentType === "trails" ? (
-              <TrailResults trails={trails} isLoading={isLoading} error={error} selectedTrailId={selectedTrailId} onSelectTrail={setSelectedTrailId} />
+              <TrailsResults trails={trails} isLoading={isLoading} error={error} selectedTrailId={selectedTrailId} onSelectTrail={handleSelectTrail} />
             ) : (
-              <PlacesResults places={places} isLoading={isLoading} error={error} selectedPlaceKey={selectedPlaceKey} onSelectPlace={setSelectedPlaceKey} />
+              <PlacesResults places={places} isLoading={isLoading} error={error} selectedPlaceKey={selectedPlaceKey} onSelectPlace={handleSelectPlace} />
             )}
           </div>
 
-          <ExploreMap
-            trails={contentType === "trails" ? trails : []}
-            places={contentType === "places" ? places : []}
-            selectedTrailId={selectedTrailId}
-            selectedPlaceKey={selectedPlaceKey}
-            onSearchArea={handleSearchArea}
-            onSelectTrail={setSelectedTrailId}
-            onSelectPlace={setSelectedPlaceKey}
-          />
+          {/* MAPA */}
+          <div className="order-1 md:order-2" ref={mapSectionRef}>
+            <ExploreMap
+              trails={contentType === "trails" ? trails : []}
+              places={contentType === "places" ? places : []}
+              selectedTrailId={selectedTrailId}
+              selectedPlaceKey={selectedPlaceKey}
+              onSearchArea={handleSearchArea}
+              onSelectTrail={setSelectedTrailId}
+              onSelectPlace={setSelectedPlaceKey}
+            />
+          </div>
         </div>
       </section>
     </main>

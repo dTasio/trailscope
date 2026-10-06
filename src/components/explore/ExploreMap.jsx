@@ -369,7 +369,7 @@ function ExploreMap({ trails, places, selectedTrailId, selectedPlaceKey, onSearc
   // --------------------------------------------------
 
   return (
-    <div className="relative h-150 w-full">
+    <div className="relative h-[60vh] min-h-105 w-full md:h-150">
       <div ref={mapContainer} className="h-full w-full" />
 
       <button type="button" onClick={handleSearchArea} className="absolute top-4 left-4 z-10 rounded-full bg-surface px-5 py-3 font-semibold text-text shadow-lg transition hover:bg-surface-secondary">

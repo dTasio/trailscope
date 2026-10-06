@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { Link } from "react-router";
 
 function PlacesResults({ places, isLoading, error, selectedPlaceKey, onSelectPlace }) {
   // Guarda una referencia a cada card para poder localizarla cuando el lugar se selecciona desde el mapa
@@ -9,6 +10,8 @@ function PlacesResults({ places, isLoading, error, selectedPlaceKey, onSelectPla
     if (selectedPlaceKey === null) return;
 
     const selectedCard = placeCardRefs.current.get(selectedPlaceKey);
+
+    if (!selectedCard) return;
 
     selectedCard.scrollIntoView({
       behavior: "smooth",
@@ -57,14 +60,14 @@ function PlacesResults({ places, isLoading, error, selectedPlaceKey, onSelectPla
 
   return (
     <div className="p-6">
-      <p className="font-semibold text-text">{places.length} lugares encontrados</p>
+      <p className="font-semibold text-text mb-4">{places.length} lugares encontrados</p>
 
-      <div className="mt-5 flex flex-col gap-3">
+      <div className="flex gap-4 overflow-x-auto px-4 pb-4 snap-x snap-mandatory md:block md:space-y-3 md:overflow-visible md:px-0 md:pb-0">
         {places.map((place) => {
           const isSelected = place.osmKey === selectedPlaceKey;
 
           return (
-            <button
+            <article
               key={place.osmKey}
               ref={(element) => {
                 if (element) {
@@ -73,17 +76,22 @@ function PlacesResults({ places, isLoading, error, selectedPlaceKey, onSelectPla
                   placeCardRefs.current.delete(place.osmKey);
                 }
               }}
-              type="button"
-              aria-pressed={isSelected}
-              onClick={() => onSelectPlace(place.osmKey)}
-              className={`w-full rounded-xl border p-4 text-left transition ${isSelected ? "border-primary bg-surface-secondary" : "border-border bg-surface hover:border-primary"}`}
+              className={`flex min-h-36 min-w-[85%] snap-start flex-col overflow-hidden rounded-xl border transition md:min-h-0 md:w-full md:min-w-0 ${isSelected ? "border-primary bg-surface-secondary" : "border-border bg-surface"}`}
             >
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">{getPlaceTypeLabel(place.type)}</p>
+              <button type="button" aria-pressed={isSelected} onClick={() => onSelectPlace(place.osmKey)} className="flex w-full flex-1 flex-col justify-center p-4 text-left">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary underline">{getPlaceTypeLabel(place.type)}</p>
 
-              <h3 className="mt-2 font-semibold text-text">{place.name}</h3>
+                <h3 className="mt-2 font-semibold text-text">{place.name}</h3>
 
-              {place.elevation && <p className="mt-2 text-sm text-muted">Altitud: {place.elevation} m</p>}
-            </button>
+                {place.elevation && <p className="mt-2 text-sm text-muted">Altitud: {place.elevation} m</p>}
+              </button>
+
+              <div className="border-t border-border px-4 py-1">
+                <Link to={`/places/${place.osmKey}`} className="text-sm font-semibold text-primary transition hover:text-primary-dark">
+                  Ver detalle →
+                </Link>
+              </div>
+            </article>
           );
         })}
       </div>
