@@ -8,10 +8,10 @@ function FinalCTASection() {
 
         <h2 className="mx-auto mt-3 max-w-2xl text-3xl font-bold tracking-tight text-text sm:text-4xl">Tu próxima escapada empieza aquí.</h2>
 
-        <p className="mx-auto mt-5 max-w-xl leading-7 text-muted">Recorre el mapa, encuentra nuevos destinos y empieza a preparar tu salida.</p>
+        <p className="mx-auto mt-5 max-w-xl leading-7 text-muted">Explora nuevas rutas y lugares naturales, guarda tus favoritos y empieza a preparar tu próxima salida.</p>
 
         <Link to="/explore" className="mt-8 inline-flex rounded-full bg-primary px-6 py-3 font-semibold text-white transition-colors hover:bg-primary-dark">
-          Empezar a explorar
+          Explorar TrailScope
         </Link>
       </div>
     </section>

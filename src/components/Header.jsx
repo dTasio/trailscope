@@ -1,57 +1,69 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, NavLink } from "react-router";
 
 function Header() {
-  //States
   const [menuOpen, setMenuOpen] = useState(false);
 
-  //Funciones
   const closeMenu = () => {
     setMenuOpen(false);
   };
 
+  const getNavLinkClass = ({ isActive }) => `rounded-lg px-4 py-3 text-lg font-medium transition-colors ${isActive ? "text-primary" : "text-text hover:text-primary"}`;
+
+  const getMobileNavLinkClass = ({ isActive }) => `font-medium transition-colors ${isActive ? "text-primary" : "text-text hover:text-primary"}`;
+
   return (
     <header className="border-b border-border bg-surface">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-        <Link to="/" className="rounded-lg px-3 py-2 text-2xl font-bold tracking-tight text-primary">
+      <div className="mx-auto flex max-w-7xl items-center px-6 py-5">
+        {/* Logo */}
+        <Link to="/" className="shrink-0 rounded-lg px-3 py-2 text-3xl font-bold tracking-tight text-primary" onClick={closeMenu}>
           TrailScope
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex">
-          <Link to="/explore" className="rounded-lg px-4 py-3 font-medium text-text transition-colors hover:text-primary">
+        {/* Navegación desktop */}
+        <nav className="ml-28 hidden flex-1 items-center justify-between md:flex" aria-label="Navegación principal">
+          <NavLink to="/explore" className={getNavLinkClass}>
             Explorar
-          </Link>
+          </NavLink>
+
+          <NavLink to="/favorites" className={getNavLinkClass}>
+            Favoritos
+          </NavLink>
+
+          <NavLink to="/trips" className={getNavLinkClass}>
+            Escapadas
+          </NavLink>
+
+          <NavLink to="/activity" className={getNavLinkClass}>
+            Completadas
+          </NavLink>
         </nav>
 
-        <div className="hidden items-center gap-4 md:flex">
-          <Link to="/login" className="rounded-lg px-4 py-3 font-medium text-text transition-colors hover:text-primary">
-            Iniciar sesión
-          </Link>
-
-          <Link to="/register" className="rounded-full bg-primary px-5 py-2.5 font-semibold text-white transition-colors hover:bg-primary-dark">
-            Registrarse
-          </Link>
-        </div>
-
-        <button type="button" className="font-medium text-text md:hidden" aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"} aria-expanded={menuOpen} onClick={() => setMenuOpen((prevMenuOpen) => !prevMenuOpen)}>
+        {/* Botón menú mobile */}
+        <button type="button" className="rounded-lg px-3 py-2 font-medium text-text transition-colors hover:text-primary md:hidden" aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"} aria-expanded={menuOpen} onClick={() => setMenuOpen((prevMenuOpen) => !prevMenuOpen)}>
           {menuOpen ? "Cerrar" : "Menú"}
         </button>
       </div>
 
+      {/* Navegación mobile */}
       {menuOpen && (
-        <nav className="border-t border-border bg-background px-6 py-5 md:hidden">
-          <div className="flex flex-col gap-5">
-            <Link to="/explore" className="font-medium text-text" onClick={closeMenu}>
+        <nav className="border-t border-border bg-background px-6 py-5 md:hidden" aria-label="Navegación móvil">
+          <div className="mx-auto flex max-w-7xl flex-col gap-5">
+            <NavLink to="/explore" className={getMobileNavLinkClass} onClick={closeMenu}>
               Explorar
-            </Link>
+            </NavLink>
 
-            <Link to="/login" className="font-medium text-text" onClick={closeMenu}>
-              Iniciar sesión
-            </Link>
+            <NavLink to="/favorites" className={getMobileNavLinkClass} onClick={closeMenu}>
+              Favoritos
+            </NavLink>
 
-            <Link to="/register" className="w-fit rounded-full bg-primary px-5 py-2.5 font-semibold text-white" onClick={closeMenu}>
-              Registrarse
-            </Link>
+            <NavLink to="/trips" className={getMobileNavLinkClass} onClick={closeMenu}>
+              Escapadas
+            </NavLink>
+
+            <NavLink to="/activity" className={getMobileNavLinkClass} onClick={closeMenu}>
+              Completadas
+            </NavLink>
           </div>
         </nav>
       )}

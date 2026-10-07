@@ -1,3 +1,5 @@
+import { Link } from "react-router";
+
 function TripPlanningSection() {
   return (
     <section className="bg-primary text-white">
@@ -35,6 +37,10 @@ function TripPlanningSection() {
             <p className="mt-2 leading-7 text-white/70">Crea escapadas con fechas, rutas, lugares y notas personales.</p>
           </div>
         </div>
+
+        <Link to="/trips" className="mt-12 inline-flex rounded-full bg-white px-6 py-3 font-semibold text-primary transition hover:bg-white/90">
+          Planificar una escapada
+        </Link>
       </div>
     </section>
   );
