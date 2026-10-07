@@ -1,12 +1,9 @@
-import { Link } from "react-router";
 import HeroSection from "../components/home/HeroSection.jsx";
 import FeaturedTrailsSection from "../components/home/FeaturedTrailsSection.jsx";
 import FeaturedPlacesSection from "../components/home/FeaturedPlacesSection.jsx";
 import MapPreviewSection from "../components/home/MapPreviewSection.jsx";
 import TripPlanningSection from "../components/home/TripPlanningSection.jsx";
 import FinalCTASection from "../components/home/FinalCTASection.jsx";
-import TrailCard from "../components/TrailCard.jsx";
-import PlaceCard from "../components/PlaceCard.jsx";
 import heroImage from "../assets/images/hero-ordesa.jpg";
 
 //Constantes

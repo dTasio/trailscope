@@ -7,13 +7,19 @@ function HeroSection() {
       <div className="max-w-xl">
         <p className="mb-5 text-sm font-semibold uppercase tracking-[0.18em] text-primary">Rutas · Naturaleza · Escapadas</p>
 
-        <h1 className="text-4xl font-bold leading-tight tracking-tight text-text sm:text-5xl lg:text-6xl">Encuentra tu próxima aventura al aire libre.</h1>
+        <h1 className="text-4xl font-bold leading-tight tracking-tight text-text sm:text-5xl lg:text-6xl">Descubre rutas. Explora lugares. Planifica tu próxima escapada.</h1>
 
-        <p className="mt-6 max-w-lg text-lg leading-8 text-muted">Explora rutas y espacios naturales, consulta información útil y prepara tu próxima escapada.</p>
+        <p className="mt-6 max-w-lg text-lg leading-8 text-muted">Explora rutas de senderismo y lugares naturales, guarda tus favoritos y organiza tus próximas salidas.</p>
 
-        <Link to="/explore" className="mt-8 inline-flex rounded-full bg-primary px-6 py-3 font-semibold text-white transition-colors hover:bg-primary-dark">
-          Explorar rutas
-        </Link>
+        <div className="mt-8 flex flex-wrap gap-4">
+          <Link to="/explore" className="inline-flex rounded-full bg-primary px-6 py-3 font-semibold text-white transition-colors hover:bg-primary-dark">
+            Explorar
+          </Link>
+
+          <Link to="/trips" className="inline-flex rounded-full border border-border bg-surface px-6 py-3 font-semibold text-text transition-colors hover:border-primary hover:text-primary">
+            Planificar escapada
+          </Link>
+        </div>
       </div>
 
       <div className="relative min-h-105 overflow-hidden rounded-2xl lg:min-h-140">
