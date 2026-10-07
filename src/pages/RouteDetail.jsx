@@ -134,22 +134,35 @@ function RouteDetail() {
 
         {/* Inicio y destino */}
         {(trail.from || trail.to) && (
-          <section className="mt-14 grid gap-6 sm:grid-cols-2">
-            {trail.from && (
-              <div>
+          <section className="mt-14">
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-center sm:gap-8">
+              {/* Inicio */}
+              <div className="sm:w-56">
                 <p className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">Inicio</p>
 
                 <p className="mt-2 text-lg font-semibold text-text">{trail.from}</p>
               </div>
-            )}
 
-            {trail.to && (
-              <div>
+              {/* Representación visual del recorrido */}
+              {trail.from && trail.to && (
+                <div className="flex justify-center sm:w-72" aria-hidden="true">
+                  <div className="flex h-14 flex-col items-center sm:h-auto sm:w-full sm:flex-row">
+                    <span className="h-3 w-3 shrink-0 rounded-full bg-primary" />
+
+                    <span className="h-full w-px bg-border sm:h-px sm:w-auto sm:flex-1" />
+
+                    <span className="h-3 w-3 shrink-0 rounded-full border-2 border-primary bg-background" />
+                  </div>
+                </div>
+              )}
+
+              {/* Destino */}
+              <div className="sm:w-56 sm:text-right">
                 <p className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">Destino</p>
 
                 <p className="mt-2 text-lg font-semibold text-text">{trail.to}</p>
               </div>
-            )}
+            </div>
           </section>
         )}
 
@@ -158,9 +171,9 @@ function RouteDetail() {
           <section className="mt-14">
             <h2 className="text-2xl font-bold tracking-tight text-text">Características del sendero</h2>
 
-            <div className="mt-6 grid gap-6 md:grid-cols-3">
+            <div className="mt-6 grid gap-y-8 lg:grid-cols-12 lg:gap-x-12">
               {trail.sacScale.length > 0 && (
-                <div>
+                <div className="min-w-0 lg:col-span-3">
                   <p className="font-semibold text-text">Dificultad</p>
 
                   <p className="mt-2 leading-7 text-muted">{formatSacScaleValues(trail.sacScale).join(" · ")}</p>
@@ -168,7 +181,7 @@ function RouteDetail() {
               )}
 
               {trail.surface.length > 0 && (
-                <div>
+                <div className="min-w-0 lg:col-span-6">
                   <p className="font-semibold text-text">Superficie</p>
 
                   <p className="mt-2 leading-7 text-muted">{formatSurfaceValues(trail.surface).join(" · ")}</p>
@@ -176,7 +189,7 @@ function RouteDetail() {
               )}
 
               {trail.trailVisibility.length > 0 && (
-                <div>
+                <div className="min-w-0 lg:col-span-3">
                   <p className="font-semibold text-text">Visibilidad</p>
 
                   <p className="mt-2 leading-7 text-muted">{formatTrailVisibilityValues(trail.trailVisibility).join(" · ")}</p>

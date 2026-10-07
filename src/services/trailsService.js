@@ -3,6 +3,7 @@ import { runOverpassQuery } from "./overpassClient";
 const MIN_TRAIL_DISTANCE_KM = 1;
 const MAX_TRAIL_DISTANCE_KM = 30;
 
+
 // Extrae las geometrías de los caminos que forman una ruta
 function getRouteLines(members = []) {
   return members
@@ -151,7 +152,7 @@ function normalizeTrail(element, routeWays = []) {
       : null;
 
   return {
-    
+
   id: element.id,
 
   name:
@@ -260,6 +261,7 @@ return data.elements
 
 // Obtiene una ruta concreta y sus caminos a partir de su ID de OpenStreetMap
 export async function getHikingTrailById(id) {
+
   const query = `
     [out:json][timeout:25];
 

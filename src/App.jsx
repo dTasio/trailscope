@@ -9,6 +9,7 @@ import Register from "./pages/Register.jsx";
 import Footer from "./components/Footer.jsx";
 
 import RouteDetail from "./pages/RouteDetail.jsx";
+import PlaceDetail from "./pages/PlaceDetail.jsx";
 
 function App() {
   const { pathname } = useLocation();
@@ -28,6 +29,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/routes/:id" element={<RouteDetail />} />
+        <Route path="/places/:osmKey" element={<PlaceDetail />} />
       </Routes>
 
       <Footer />
