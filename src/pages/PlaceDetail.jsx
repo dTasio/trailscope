@@ -8,6 +8,8 @@ import placeDefaultImage from "../assets/images/place-default.jpg";
 
 import { formatAccess, formatDirection, formatPlaceName, formatPlaceType, formatWheelchair, formatYesNo } from "../utils/placeFormatters.js";
 
+import { addFavorite, removeFavorite, isFavorite as checkIsFavorite } from "../services/favoritesService.js";
+
 function DetailMetric({ value, label }) {
   return (
     <div className="rounded-xl border border-border bg-surface p-4">
@@ -89,6 +91,8 @@ function PlaceDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [isPlaceFavorite, setIsPlaceFavorite] = useState(false);
+
   useEffect(() => {
     const loadPlace = async () => {
       setIsLoading(true);
@@ -98,6 +102,10 @@ function PlaceDetail() {
         const placeData = await getNaturalPlaceByKey(osmKey);
 
         setPlace(placeData);
+
+        const favoriteId = `place-${placeData.osmKey}`;
+
+        setIsPlaceFavorite(checkIsFavorite(favoriteId));
       } catch (error) {
         setError(error.message);
       } finally {
@@ -136,6 +144,40 @@ function PlaceDetail() {
 
   const displayType = formatPlaceType(place.type);
 
+  const handleFavorite = () => {
+    if (!place) {
+      return;
+    }
+
+    const favoriteId = `place-${place.osmKey}`;
+
+    if (isPlaceFavorite) {
+      removeFavorite(favoriteId);
+
+      setIsPlaceFavorite(false);
+
+      return;
+    }
+
+    const favorite = {
+      favoriteId,
+      contentType: "place",
+
+      osmKey: place.osmKey,
+      name: place.name,
+      type: place.type,
+
+      elevation: place.elevation,
+      coordinates: place.coordinates,
+
+      image: place.image,
+    };
+
+    addFavorite(favorite);
+
+    setIsPlaceFavorite(true);
+  };
+
   return (
     <main>
       <section className="mx-auto max-w-7xl px-6 py-10">
@@ -157,8 +199,12 @@ function PlaceDetail() {
 
           {/* Acciones */}
           <div className="mt-6 flex flex-wrap gap-3">
-            <button type="button" className="rounded-full bg-primary px-5 py-2.5 font-semibold text-white transition-colors hover:bg-primary-dark">
-              ♡ Guardar favorito
+            <button
+              type="button"
+              onClick={handleFavorite}
+              className={`rounded-full px-5 py-2.5 font-semibold transition-colors ${isPlaceFavorite ? "bg-primary text-white hover:bg-primary-dark" : "border border-border bg-surface text-text hover:border-primary hover:text-primary"}`}
+            >
+              {isPlaceFavorite ? "♥ Guardado" : "♡ Guardar favorito"}
             </button>
 
             <button type="button" className="rounded-full border border-border bg-surface px-5 py-2.5 font-semibold text-text transition-colors hover:border-primary hover:text-primary">

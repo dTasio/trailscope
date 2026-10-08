@@ -8,6 +8,8 @@ import routeDefaultImage from "../assets/images/route-default.jpg";
 
 import { formatSurfaceValues, formatTrailVisibilityValues, formatSacScaleValues } from "../utils/trailFormatters.js";
 
+import { addFavorite, removeFavorite, isFavorite as checkIsFavorite } from "../services/favoritesService.js";
+
 function DetailMetric({ value, label }) {
   return (
     <div className="rounded-xl border border-border bg-surface p-4">
@@ -39,6 +41,8 @@ function RouteDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [isTrailFavorite, setIsTrailFavorite] = useState(false);
+
   useEffect(() => {
     const loadTrail = async () => {
       setIsLoading(true);
@@ -48,6 +52,10 @@ function RouteDetail() {
         const trailData = await getHikingTrailById(id);
 
         setTrail(trailData);
+
+        const favoriteId = `trail-${trailData.id}`;
+
+        setIsTrailFavorite(checkIsFavorite(favoriteId));
       } catch (error) {
         setError(error.message);
       } finally {
@@ -90,6 +98,42 @@ function RouteDetail() {
 
   const hasTrailCharacteristics = surfaces.length > 0 || trailVisibility.length > 0 || sacScale.length > 0;
 
+  const handleFavorite = () => {
+    if (!trail) {
+      return;
+    }
+
+    const favoriteId = `trail-${trail.id}`;
+
+    if (isTrailFavorite) {
+      removeFavorite(favoriteId);
+
+      setIsTrailFavorite(false);
+
+      return;
+    }
+
+    const favorite = {
+      favoriteId,
+      contentType: "trail",
+
+      id: trail.id,
+      name: trail.name,
+
+      distance: trail.distance,
+      ascent: trail.ascent,
+      descent: trail.descent,
+      duration: trail.duration,
+
+      from: trail.from,
+      to: trail.to,
+    };
+
+    addFavorite(favorite);
+
+    setIsTrailFavorite(true);
+  };
+
   return (
     <main>
       <section className="mx-auto max-w-7xl px-6 py-10">
@@ -117,8 +161,12 @@ function RouteDetail() {
 
           {/* Acciones */}
           <div className="mt-6 flex flex-wrap gap-3">
-            <button type="button" className="rounded-full bg-primary px-5 py-2.5 font-semibold text-white transition-colors hover:bg-primary-dark">
-              ♡ Guardar favorito
+            <button
+              type="button"
+              onClick={handleFavorite}
+              className={`rounded-full px-5 py-2.5 font-semibold transition-colors ${isTrailFavorite ? "bg-primary text-white hover:bg-primary-dark" : "border border-border bg-surface text-text hover:border-primary hover:text-primary"}`}
+            >
+              {isTrailFavorite ? "♥ Guardado" : "♡ Guardar favorito"}
             </button>
 
             <button type="button" className="rounded-full border border-border bg-surface px-5 py-2.5 font-semibold text-text transition-colors hover:border-primary hover:text-primary">
