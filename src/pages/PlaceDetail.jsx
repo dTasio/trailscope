@@ -8,6 +8,8 @@ import placeDefaultImage from "../assets/images/place-default.jpg";
 
 import { formatAccess, formatDirection, formatPlaceName, formatPlaceType, formatWheelchair, formatYesNo } from "../utils/placeFormatters.js";
 
+import { addFavorite, removeFavorite, isFavorite as checkIsFavorite } from "../services/favoritesService.js";
+
 function DetailMetric({ value, label }) {
   return (
     <div className="rounded-xl border border-border bg-surface p-4">
@@ -18,65 +20,115 @@ function DetailMetric({ value, label }) {
   );
 }
 
-function InformationItem({ title, value }) {
+function PlaceInformationItem({ title, value }) {
+  if (!value) {
+    return null;
+  }
+
   return (
-    <div>
+    <div className="min-w-0">
       <p className="font-semibold text-text">{title}</p>
 
-      <p className="mt-2 leading-7 text-muted">{value}</p>
+      <div className="mt-3">
+        <span className="inline-flex rounded-full bg-surface-secondary px-3 py-1.5 text-sm text-muted">{value}</span>
+      </div>
     </div>
   );
 }
 
 function PlaceCharacteristics({ place }) {
-  const hasWaterfallData = place.type === "waterfall" && (place.seasonal || place.intermittent);
+  const characteristics = [
+    place.seasonal && {
+      id: "seasonal",
+      title: "Estacional",
+      value: formatYesNo(place.seasonal),
+    },
 
-  const hasViewpointData = place.type === "viewpoint" && place.viewpointType;
+    place.intermittent && {
+      id: "intermittent",
+      title: "Intermitente",
+      value: formatYesNo(place.intermittent),
+    },
 
-  const hasLakeData = place.type === "lake" && (place.seasonal || place.intermittent || place.salt);
+    place.viewpointType && {
+      id: "viewpoint-type",
+      title: "Tipo de mirador",
+      value: place.viewpointType,
+    },
 
-  if (!hasWaterfallData && !hasViewpointData && !hasLakeData) {
+    place.salt && {
+      id: "salt",
+      title: "Tipo de agua",
+      value: formatYesNo(place.salt),
+    },
+  ].filter(Boolean);
+
+  if (characteristics.length === 0) {
     return null;
   }
+
+  const gridClass = characteristics.length === 1 ? "max-w-2xl" : characteristics.length === 2 ? "grid gap-8 md:grid-cols-2" : "grid gap-8 md:grid-cols-2 lg:grid-cols-3";
 
   return (
     <section className="mt-14">
       <h2 className="text-2xl font-bold tracking-tight text-text">Características</h2>
 
-      <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {place.seasonal && <InformationItem title="Estacional" value={formatYesNo(place.seasonal)} />}
-
-        {place.intermittent && <InformationItem title="Intermitente" value={formatYesNo(place.intermittent)} />}
-
-        {place.viewpointType && <InformationItem title="Tipo de mirador" value={place.viewpointType} />}
-
-        {place.salt && <InformationItem title="Tipo de agua" value={formatYesNo(place.salt)} />}
+      <div className={`mt-6 ${gridClass}`}>
+        {characteristics.map((characteristic) => (
+          <PlaceInformationItem key={characteristic.id} title={characteristic.title} value={characteristic.value} />
+        ))}
       </div>
     </section>
   );
 }
 
 function VisitInformation({ place }) {
-  const hasVisitInformation = place.access || place.wheelchair || place.fee || place.charge || place.openingHours;
+  const visitInformation = [
+    place.access && {
+      id: "access",
+      title: "Acceso",
+      value: formatAccess(place.access),
+    },
 
-  if (!hasVisitInformation) {
+    place.wheelchair && {
+      id: "wheelchair",
+      title: "Accesibilidad",
+      value: formatWheelchair(place.wheelchair),
+    },
+
+    place.fee && {
+      id: "fee",
+      title: "Acceso de pago",
+      value: formatYesNo(place.fee),
+    },
+
+    place.charge && {
+      id: "charge",
+      title: "Precio",
+      value: place.charge,
+    },
+
+    place.openingHours && {
+      id: "opening-hours",
+      title: "Horario",
+      value: place.openingHours,
+    },
+  ].filter(Boolean);
+
+  if (visitInformation.length === 0) {
     return null;
   }
+
+  const gridClass = visitInformation.length === 1 ? "max-w-2xl" : visitInformation.length === 2 ? "grid gap-8 md:grid-cols-2" : "grid gap-8 md:grid-cols-2 lg:grid-cols-3";
 
   return (
     <section className="mt-14">
       <h2 className="text-2xl font-bold tracking-tight text-text">Información de visita</h2>
 
-      <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {place.access && <InformationItem title="Acceso" value={formatAccess(place.access)} />}
-
-        {place.wheelchair && <InformationItem title="Accesibilidad" value={formatWheelchair(place.wheelchair)} />}
-
-        {place.fee && <InformationItem title="Acceso de pago" value={formatYesNo(place.fee)} />}
-
-        {place.charge && <InformationItem title="Precio" value={place.charge} />}
-
-        {place.openingHours && <InformationItem title="Horario" value={place.openingHours} />}
+      <div className={`mt-6 ${gridClass}`}>
+        {visitInformation.map((information) => (
+          <PlaceInformationItem key={information.id} title={information.title} value={information.value} />
+        ))}
       </div>
     </section>
   );
@@ -89,6 +141,8 @@ function PlaceDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [isPlaceFavorite, setIsPlaceFavorite] = useState(false);
+
   useEffect(() => {
     const loadPlace = async () => {
       setIsLoading(true);
@@ -98,6 +152,10 @@ function PlaceDetail() {
         const placeData = await getNaturalPlaceByKey(osmKey);
 
         setPlace(placeData);
+
+        const favoriteId = `place-${placeData.osmKey}`;
+
+        setIsPlaceFavorite(checkIsFavorite(favoriteId));
       } catch (error) {
         setError(error.message);
       } finally {
@@ -136,6 +194,40 @@ function PlaceDetail() {
 
   const displayType = formatPlaceType(place.type);
 
+  const handleFavorite = () => {
+    if (!place) {
+      return;
+    }
+
+    const favoriteId = `place-${place.osmKey}`;
+
+    if (isPlaceFavorite) {
+      removeFavorite(favoriteId);
+
+      setIsPlaceFavorite(false);
+
+      return;
+    }
+
+    const favorite = {
+      favoriteId,
+      contentType: "place",
+
+      osmKey: place.osmKey,
+      name: place.name,
+      type: place.type,
+
+      elevation: place.elevation,
+      coordinates: place.coordinates,
+
+      image: place.image,
+    };
+
+    addFavorite(favorite);
+
+    setIsPlaceFavorite(true);
+  };
+
   return (
     <main>
       <section className="mx-auto max-w-7xl px-6 py-10">
@@ -157,8 +249,12 @@ function PlaceDetail() {
 
           {/* Acciones */}
           <div className="mt-6 flex flex-wrap gap-3">
-            <button type="button" className="rounded-full bg-primary px-5 py-2.5 font-semibold text-white transition-colors hover:bg-primary-dark">
-              ♡ Guardar favorito
+            <button
+              type="button"
+              onClick={handleFavorite}
+              className={`rounded-full px-5 py-2.5 font-semibold transition-colors ${isPlaceFavorite ? "bg-primary text-white hover:bg-primary-dark" : "border border-border bg-surface text-text hover:border-primary hover:text-primary"}`}
+            >
+              {isPlaceFavorite ? "♥ Guardado" : "♡ Guardar favorito"}
             </button>
 
             <button type="button" className="rounded-full border border-border bg-surface px-5 py-2.5 font-semibold text-text transition-colors hover:border-primary hover:text-primary">
