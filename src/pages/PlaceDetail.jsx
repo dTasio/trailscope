@@ -20,65 +20,115 @@ function DetailMetric({ value, label }) {
   );
 }
 
-function InformationItem({ title, value }) {
+function PlaceInformationItem({ title, value }) {
+  if (!value) {
+    return null;
+  }
+
   return (
-    <div>
+    <div className="min-w-0">
       <p className="font-semibold text-text">{title}</p>
 
-      <p className="mt-2 leading-7 text-muted">{value}</p>
+      <div className="mt-3">
+        <span className="inline-flex rounded-full bg-surface-secondary px-3 py-1.5 text-sm text-muted">{value}</span>
+      </div>
     </div>
   );
 }
 
 function PlaceCharacteristics({ place }) {
-  const hasWaterfallData = place.type === "waterfall" && (place.seasonal || place.intermittent);
+  const characteristics = [
+    place.seasonal && {
+      id: "seasonal",
+      title: "Estacional",
+      value: formatYesNo(place.seasonal),
+    },
 
-  const hasViewpointData = place.type === "viewpoint" && place.viewpointType;
+    place.intermittent && {
+      id: "intermittent",
+      title: "Intermitente",
+      value: formatYesNo(place.intermittent),
+    },
 
-  const hasLakeData = place.type === "lake" && (place.seasonal || place.intermittent || place.salt);
+    place.viewpointType && {
+      id: "viewpoint-type",
+      title: "Tipo de mirador",
+      value: place.viewpointType,
+    },
 
-  if (!hasWaterfallData && !hasViewpointData && !hasLakeData) {
+    place.salt && {
+      id: "salt",
+      title: "Tipo de agua",
+      value: formatYesNo(place.salt),
+    },
+  ].filter(Boolean);
+
+  if (characteristics.length === 0) {
     return null;
   }
+
+  const gridClass = characteristics.length === 1 ? "max-w-2xl" : characteristics.length === 2 ? "grid gap-8 md:grid-cols-2" : "grid gap-8 md:grid-cols-2 lg:grid-cols-3";
 
   return (
     <section className="mt-14">
       <h2 className="text-2xl font-bold tracking-tight text-text">Características</h2>
 
-      <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {place.seasonal && <InformationItem title="Estacional" value={formatYesNo(place.seasonal)} />}
-
-        {place.intermittent && <InformationItem title="Intermitente" value={formatYesNo(place.intermittent)} />}
-
-        {place.viewpointType && <InformationItem title="Tipo de mirador" value={place.viewpointType} />}
-
-        {place.salt && <InformationItem title="Tipo de agua" value={formatYesNo(place.salt)} />}
+      <div className={`mt-6 ${gridClass}`}>
+        {characteristics.map((characteristic) => (
+          <PlaceInformationItem key={characteristic.id} title={characteristic.title} value={characteristic.value} />
+        ))}
       </div>
     </section>
   );
 }
 
 function VisitInformation({ place }) {
-  const hasVisitInformation = place.access || place.wheelchair || place.fee || place.charge || place.openingHours;
+  const visitInformation = [
+    place.access && {
+      id: "access",
+      title: "Acceso",
+      value: formatAccess(place.access),
+    },
 
-  if (!hasVisitInformation) {
+    place.wheelchair && {
+      id: "wheelchair",
+      title: "Accesibilidad",
+      value: formatWheelchair(place.wheelchair),
+    },
+
+    place.fee && {
+      id: "fee",
+      title: "Acceso de pago",
+      value: formatYesNo(place.fee),
+    },
+
+    place.charge && {
+      id: "charge",
+      title: "Precio",
+      value: place.charge,
+    },
+
+    place.openingHours && {
+      id: "opening-hours",
+      title: "Horario",
+      value: place.openingHours,
+    },
+  ].filter(Boolean);
+
+  if (visitInformation.length === 0) {
     return null;
   }
+
+  const gridClass = visitInformation.length === 1 ? "max-w-2xl" : visitInformation.length === 2 ? "grid gap-8 md:grid-cols-2" : "grid gap-8 md:grid-cols-2 lg:grid-cols-3";
 
   return (
     <section className="mt-14">
       <h2 className="text-2xl font-bold tracking-tight text-text">Información de visita</h2>
 
-      <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {place.access && <InformationItem title="Acceso" value={formatAccess(place.access)} />}
-
-        {place.wheelchair && <InformationItem title="Accesibilidad" value={formatWheelchair(place.wheelchair)} />}
-
-        {place.fee && <InformationItem title="Acceso de pago" value={formatYesNo(place.fee)} />}
-
-        {place.charge && <InformationItem title="Precio" value={place.charge} />}
-
-        {place.openingHours && <InformationItem title="Horario" value={place.openingHours} />}
+      <div className={`mt-6 ${gridClass}`}>
+        {visitInformation.map((information) => (
+          <PlaceInformationItem key={information.id} title={information.title} value={information.value} />
+        ))}
       </div>
     </section>
   );

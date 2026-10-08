@@ -34,6 +34,28 @@ function TrailInformationItem({ title, values, formatter }) {
   );
 }
 
+function TrailCharacteristic({ title, values, formatter }) {
+  if (values.length === 0) {
+    return null;
+  }
+
+  const formattedValues = formatter(values);
+
+  return (
+    <div className="min-w-0">
+      <p className="font-semibold text-text">{title}</p>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        {formattedValues.map((value) => (
+          <span key={value} className="rounded-full bg-surface-secondary px-3 py-1.5 text-sm text-muted">
+            {value}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function RouteDetail() {
   const { id } = useParams();
 
@@ -97,6 +119,31 @@ function RouteDetail() {
   const sacScale = trail.sacScale ?? [];
 
   const hasTrailCharacteristics = surfaces.length > 0 || trailVisibility.length > 0 || sacScale.length > 0;
+
+  const trailCharacteristics = [
+    sacScale.length > 0 && {
+      id: "difficulty",
+      title: "Dificultad",
+      values: sacScale,
+      formatter: formatSacScaleValues,
+    },
+
+    surfaces.length > 0 && {
+      id: "surface",
+      title: "Superficie",
+      values: surfaces,
+      formatter: formatSurfaceValues,
+    },
+
+    trailVisibility.length > 0 && {
+      id: "visibility",
+      title: "Visibilidad",
+      values: trailVisibility,
+      formatter: formatTrailVisibilityValues,
+    },
+  ].filter(Boolean);
+
+  const characteristicsGridClass = trailCharacteristics.length === 1 ? "max-w-2xl" : trailCharacteristics.length === 2 ? "grid gap-8 md:grid-cols-2" : "grid gap-8 md:grid-cols-2 lg:grid-cols-3";
 
   const handleFavorite = () => {
     if (!trail) {
@@ -249,24 +296,10 @@ function RouteDetail() {
           <section className="mt-14">
             <h2 className="text-2xl font-bold tracking-tight text-text">Características del sendero</h2>
 
-            <div className="mt-6 grid gap-y-8 lg:grid-cols-12 lg:gap-x-12">
-              {sacScale.length > 0 && (
-                <div className="lg:col-span-3">
-                  <TrailInformationItem title="Dificultad" values={sacScale} formatter={formatSacScaleValues} />
-                </div>
-              )}
-
-              {surfaces.length > 0 && (
-                <div className="lg:col-span-6">
-                  <TrailInformationItem title="Superficie" values={surfaces} formatter={formatSurfaceValues} />
-                </div>
-              )}
-
-              {trailVisibility.length > 0 && (
-                <div className="lg:col-span-3">
-                  <TrailInformationItem title="Visibilidad" values={trailVisibility} formatter={formatTrailVisibilityValues} />
-                </div>
-              )}
+            <div className={`mt-6 ${characteristicsGridClass}`}>
+              {trailCharacteristics.map((characteristic) => (
+                <TrailCharacteristic key={characteristic.id} title={characteristic.title} values={characteristic.values} formatter={characteristic.formatter} />
+              ))}
             </div>
           </section>
         )}
