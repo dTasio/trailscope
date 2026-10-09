@@ -12,6 +12,7 @@ import Activity from "./pages/Activity.jsx";
 
 import RouteDetail from "./pages/RouteDetail.jsx";
 import PlaceDetail from "./pages/PlaceDetail.jsx";
+import TripDetail from "./pages/TripDetail.jsx";
 
 function App() {
   const { pathname } = useLocation();
@@ -33,6 +34,7 @@ function App() {
         <Route path="/favorites" element={<Favorites />} />
         <Route path="/trips" element={<Trips />} />
         <Route path="/activity" element={<Activity />} />
+        <Route path="/trips/:id" element={<TripDetail />} />
       </Routes>
 
       <Footer />
