@@ -170,6 +170,10 @@ function TripDetail() {
     return true;
   });
 
+  const visibleNearbyTrails = contentType === "places" ? [] : nearbyTrails;
+
+  const visibleNearbyPlaces = contentType === "trails" ? [] : nearbyPlaces;
+
   const hasDestinationCoordinates = typeof trip.destination?.latitude === "number" && typeof trip.destination?.longitude === "number";
 
   /*
@@ -581,7 +585,7 @@ function TripDetail() {
             {/* Columna derecha */}
             <div className="min-w-0">
               {/* Mapa */}
-              <TripPlannerMap destination={trip.destination} />
+              <TripPlannerMap destination={trip.destination} trails={visibleNearbyTrails} places={visibleNearbyPlaces} />
 
               {/* Resultados */}
               <div className="mt-5 min-w-0">
