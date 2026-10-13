@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import NewTripModal from "../components/trips/NewTripModal.jsx";
 import TripCard from "../components/trips/TripCard.jsx";
 
-import { createTrip, getTrips } from "../services/tripsService.js";
+import { createTrip, getTrips, deleteTrip } from "../services/tripsService.js";
 
 function Trips() {
   const [trips, setTrips] = useState(() => getTrips());
@@ -18,6 +18,14 @@ function Trips() {
     setTrips((currentTrips) => [...currentTrips, newTrip]);
 
     setSuccessMessage("Escapada creada correctamente.");
+  };
+
+  const handleDeleteTrip = (tripId) => {
+    const updatedTrips = deleteTrip(tripId);
+
+    setTrips(updatedTrips);
+
+    setSuccessMessage("Escapada eliminada correctamente.");
   };
 
   useEffect(() => {
@@ -105,7 +113,7 @@ function Trips() {
           ) : (
             <div className="mt-7 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {trips.map((trip) => (
-                <TripCard key={trip.id} trip={trip} />
+                <TripCard key={trip.id} trip={trip} onDelete={handleDeleteTrip} />
               ))}
             </div>
           )}

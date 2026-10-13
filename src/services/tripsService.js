@@ -67,15 +67,15 @@ export function createTrip(tripData) {
 export function updateTrip(updatedTrip) {
   const trips = getTrips();
 
-  const updatedTrips = trips.map(
-    (trip) =>
-      trip.id === updatedTrip.id
-        ? {
-            ...updatedTrip,
-            updatedAt:
-              new Date().toISOString(),
-          }
-        : trip
+  const tripWithUpdatedDate = {
+    ...updatedTrip,
+    updatedAt: new Date().toISOString(),
+  };
+
+  const updatedTrips = trips.map((trip) =>
+    trip.id === tripWithUpdatedDate.id
+      ? tripWithUpdatedDate
+      : trip
   );
 
   setStoredData(
@@ -83,7 +83,7 @@ export function updateTrip(updatedTrip) {
     updatedTrips
   );
 
-  return updatedTrips;
+  return tripWithUpdatedDate;
 }
 
 export function deleteTrip(tripId) {

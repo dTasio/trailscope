@@ -12,10 +12,20 @@ function formatDate(date) {
   }).format(new Date(`${date}T00:00:00`));
 }
 
-function TripCard({ trip }) {
+function TripCard({ trip, onDelete }) {
   const trailsCount = trip.trails?.length ?? 0;
 
   const placesCount = trip.places?.length ?? 0;
+
+  const handleDelete = () => {
+    const confirmed = window.confirm(`¿Quieres eliminar "${trip.name}"? Esta acción no se puede deshacer.`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    onDelete(trip.id);
+  };
 
   return (
     <article className="flex h-full flex-col rounded-2xl border border-border bg-surface p-6 transition hover:-translate-y-1 hover:shadow-md">
@@ -41,10 +51,14 @@ function TripCard({ trip }) {
         </span>
       </div>
 
-      <div className="mt-auto pt-7">
+      <div className="mt-auto flex items-center justify-between gap-4 pt-7">
         <Link to={`/trips/${trip.id}`} className="font-semibold text-primary transition-colors hover:text-primary-dark">
           Ver escapada →
         </Link>
+
+        <button type="button" onClick={handleDelete} className="text-sm font-semibold text-red-700 transition-colors hover:text-red-900" aria-label={`Eliminar ${trip.name}`}>
+          Eliminar
+        </button>
       </div>
     </article>
   );
