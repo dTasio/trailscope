@@ -28,7 +28,7 @@ function extendBoundsFromCoordinates(bounds, coordinates) {
   });
 }
 
-function TripPlannerMap({ destination, trails = [], places = [], selectedResult = null }) {
+function TripPlannerMap({ destination, trails = [], places = [], selectedResult = null, onSelectResult }) {
   const mapContainer = useRef(null);
 
   const mapRef = useRef(null);
@@ -42,7 +42,7 @@ function TripPlannerMap({ destination, trails = [], places = [], selectedResult 
   const [isMapReady, setIsMapReady] = useState(false);
 
   /*
-   * Crear mapa.
+   * Crear mapa una sola vez.
    */
   useEffect(() => {
     if (!mapContainer.current) {
@@ -63,7 +63,7 @@ function TripPlannerMap({ destination, trails = [], places = [], selectedResult 
 
     map.on("load", () => {
       /*
-       * Todas las rutas.
+       * Todas las rutas visibles.
        */
       map.addSource("trip-trails", {
         type: "geojson",
@@ -139,6 +139,8 @@ function TripPlannerMap({ destination, trails = [], places = [], selectedResult 
 
     return () => {
       placeMarkersRef.current.forEach((marker) => marker.remove());
+
+      placeMarkersRef.current = [];
 
       selectedPlaceMarkerRef.current?.remove();
 
@@ -253,9 +255,76 @@ function TripPlannerMap({ destination, trails = [], places = [], selectedResult 
         .setLngLat([longitude, latitude])
         .addTo(map);
 
+      const markerElement = marker.getElement();
+
+      markerElement.style.cursor = "pointer";
+
+      markerElement.addEventListener("click", (event) => {
+        event.stopPropagation();
+
+        onSelectResult?.({
+          ...place,
+          resultType: "place",
+        });
+      });
+
       placeMarkersRef.current.push(marker);
     });
-  }, [places, isMapReady]);
+  }, [places, isMapReady, onSelectResult]);
+
+  /*
+   * Clic sobre una ruta.
+   */
+  useEffect(() => {
+    const map = mapRef.current;
+
+    if (!map || !isMapReady) {
+      return;
+    }
+
+    const handleTrailClick = (event) => {
+      const clickedFeature = event.features?.[0];
+
+      const trailId = clickedFeature?.properties?.id;
+
+      if (trailId === undefined || trailId === null) {
+        return;
+      }
+
+      const trail = trails.find((item) => String(item.id) === String(trailId));
+
+      if (!trail) {
+        return;
+      }
+
+      onSelectResult?.({
+        ...trail,
+        resultType: "trail",
+      });
+    };
+
+    const handleMouseEnter = () => {
+      map.getCanvas().style.cursor = "pointer";
+    };
+
+    const handleMouseLeave = () => {
+      map.getCanvas().style.cursor = "";
+    };
+
+    map.on("click", "trip-trails-line", handleTrailClick);
+
+    map.on("mouseenter", "trip-trails-line", handleMouseEnter);
+
+    map.on("mouseleave", "trip-trails-line", handleMouseLeave);
+
+    return () => {
+      map.off("click", "trip-trails-line", handleTrailClick);
+
+      map.off("mouseenter", "trip-trails-line", handleMouseEnter);
+
+      map.off("mouseleave", "trip-trails-line", handleMouseLeave);
+    };
+  }, [trails, isMapReady, onSelectResult]);
 
   /*
    * Resultado seleccionado.

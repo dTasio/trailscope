@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router";
 
 import TripPlannerMap from "../components/trips/TripPlannerMap.jsx";
 import NearbyResultsCarousel from "../components/trips/NearbyResultsCarousel.jsx";
+import TripWeather from "../components/trips/TripWeather.jsx";
 
 import { getTripById, updateTrip } from "../services/tripsService.js";
 
@@ -40,12 +41,6 @@ function getBoundsAroundLocation(latitude, longitude, radiusKm = 12) {
     west: longitude - longitudeDelta,
   };
 }
-
-const handleContentTypeChange = (nextContentType) => {
-  setContentType(nextContentType);
-
-  setSelectedNearbyResult(null);
-};
 
 function TripDetail() {
   const { id } = useParams();
@@ -88,6 +83,20 @@ function TripDetail() {
   const [hasSearchedNearbyContent, setHasSearchedNearbyContent] = useState(false);
 
   const [selectedNearbyResult, setSelectedNearbyResult] = useState(null);
+
+  /*
+   * Cambiar filtro.
+   *
+   * IMPORTANTE:
+   * esta función debe estar dentro
+   * de TripDetail porque utiliza
+   * estados del componente.
+   */
+  const handleContentTypeChange = (nextContentType) => {
+    setContentType(nextContentType);
+
+    setSelectedNearbyResult(null);
+  };
 
   /*
    * Ocultar mensaje del planificador.
@@ -147,46 +156,29 @@ function TripDetail() {
   const places = trip.places ?? [];
 
   /*
-   * Convertimos las rutas y lugares
-   * en un único array de resultados.
+   * Una única fuente de verdad
+   * para filtros + mapa + carrusel.
    */
-  const combinedNearbyResults = [
-    ...nearbyTrails.map((trail) => ({
+  const visibleNearbyTrails = contentType === "places" ? [] : nearbyTrails;
+
+  const visibleNearbyPlaces = contentType === "trails" ? [] : nearbyPlaces;
+
+  const visibleNearbyResults = [
+    ...visibleNearbyTrails.map((trail) => ({
       ...trail,
       resultType: "trail",
     })),
 
-    ...nearbyPlaces.map((place) => ({
+    ...visibleNearbyPlaces.map((place) => ({
       ...place,
       resultType: "place",
     })),
   ];
 
-  /*
-   * Aplicamos el filtro seleccionado
-   * sobre el mismo carrusel.
-   */
-  const visibleNearbyResults = combinedNearbyResults.filter((item) => {
-    if (contentType === "trails") {
-      return item.resultType === "trail";
-    }
-
-    if (contentType === "places") {
-      return item.resultType === "place";
-    }
-
-    return true;
-  });
-
-  const visibleNearbyTrails = contentType === "places" ? [] : nearbyTrails;
-
-  const visibleNearbyPlaces = contentType === "trails" ? [] : nearbyPlaces;
-
   const hasDestinationCoordinates = typeof trip.destination?.latitude === "number" && typeof trip.destination?.longitude === "number";
 
   /*
-   * Cargar rutas y lugares
-   * alrededor de una localidad.
+   * Cargar contenido cercano.
    */
   const loadNearbyContent = async (location) => {
     const bounds = getBoundsAroundLocation(location.latitude, location.longitude);
@@ -201,6 +193,8 @@ function TripDetail() {
     setHasSearchedNearbyContent(false);
 
     setContentType("all");
+
+    setSelectedNearbyResult(null);
 
     try {
       const results = await Promise.allSettled([getHikingTrails(bounds), getNaturalPlaces(bounds)]);
@@ -294,9 +288,9 @@ function TripDetail() {
 
     setLocationSearchError("");
 
-    setPlannerSuccessMessage(`Zona localizada: ${location.label}`);
-
     setSelectedNearbyResult(null);
+
+    setPlannerSuccessMessage(`Zona localizada: ${location.label}`);
 
     void loadNearbyContent(location);
   };
@@ -305,7 +299,7 @@ function TripDetail() {
    * Añadir ruta.
    */
   const handleAddTrail = (trail) => {
-    const alreadyAdded = trails.some((storedTrail) => storedTrail.id === trail.id);
+    const alreadyAdded = trails.some((storedTrail) => String(storedTrail.id) === String(trail.id));
 
     if (alreadyAdded) {
       return;
@@ -313,7 +307,6 @@ function TripDetail() {
 
     const trailSnapshot = {
       id: trail.id,
-
       name: trail.name,
 
       distance: trail.distance,
@@ -386,7 +379,7 @@ function TripDetail() {
     const updatedTrip = updateTrip({
       ...trip,
 
-      trails: trails.filter((trail) => trail.id !== trailId),
+      trails: trails.filter((trail) => String(trail.id) !== String(trailId)),
     });
 
     setTrip(updatedTrip);
@@ -470,14 +463,12 @@ function TripDetail() {
             <p className="mt-3 max-w-2xl leading-7 text-muted">Explora la zona, añade rutas y lugares y organiza todo lo que quieres hacer durante la salida.</p>
           </div>
 
-          {/* Mensaje */}
           {plannerSuccessMessage && (
             <div className="mb-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-semibold text-green-800" role="status">
               ✓ {plannerSuccessMessage}
             </div>
           )}
 
-          {/* Layout */}
           <div className="grid gap-6 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.4fr)]">
             {/* Panel izquierdo */}
             <div className="min-w-0 rounded-2xl border border-border bg-surface p-6">
@@ -512,14 +503,12 @@ function TripDetail() {
                   </button>
                 </form>
 
-                {/* Error */}
                 {locationSearchError && (
                   <p className="mt-3 text-sm font-medium text-red-700" role="alert">
                     {locationSearchError}
                   </p>
                 )}
 
-                {/* Localidades */}
                 {locationResults.length > 0 && (
                   <div className="mt-4 overflow-hidden rounded-xl border border-border bg-background">
                     {locationResults.map((location) => (
@@ -550,7 +539,6 @@ function TripDetail() {
               <div className="mt-8 border-t border-border pt-6">
                 <p className="font-semibold text-text">Contenido</p>
 
-                {/* Filtros */}
                 <div className="mt-3 flex flex-wrap gap-2">
                   <button type="button" onClick={() => handleContentTypeChange("all")} className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${contentType === "all" ? "bg-primary text-white" : "border border-border text-text hover:border-primary"}`}>
                     Todos
@@ -573,7 +561,6 @@ function TripDetail() {
                   </button>
                 </div>
 
-                {/* Explicación */}
                 {hasSearchedNearbyContent && !isLoadingNearbyContent && visibleNearbyResults.length > 0 && (
                   <div className="mt-5 rounded-xl bg-surface-secondary p-4">
                     <p className="text-sm leading-6 text-muted">
@@ -582,14 +569,12 @@ function TripDetail() {
                   </div>
                 )}
 
-                {/* Aviso API */}
                 {nearbyContentError && (
                   <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-medium text-amber-800" role="status">
                     {nearbyContentError}
                   </div>
                 )}
 
-                {/* Estado inicial */}
                 {!hasSearchedNearbyContent && !isLoadingNearbyContent && (
                   <div className="mt-5 rounded-xl bg-surface-secondary p-4">
                     <p className="font-medium text-text">Busca una zona para empezar</p>
@@ -600,12 +585,10 @@ function TripDetail() {
               </div>
             </div>
 
-            {/* Columna derecha */}
+            {/* Mapa + resultados */}
             <div className="min-w-0">
-              {/* Mapa */}
-              <TripPlannerMap destination={trip.destination} trails={visibleNearbyTrails} places={visibleNearbyPlaces} selectedResult={selectedNearbyResult} />
+              <TripPlannerMap destination={trip.destination} trails={visibleNearbyTrails} places={visibleNearbyPlaces} selectedResult={selectedNearbyResult} onSelectResult={setSelectedNearbyResult} />
 
-              {/* Resultados */}
               <div className="mt-5 min-w-0">
                 {isLoadingNearbyContent && (
                   <div className="rounded-xl bg-surface-secondary p-5">
@@ -618,7 +601,7 @@ function TripDetail() {
                 {!isLoadingNearbyContent && hasSearchedNearbyContent && (
                   <>
                     {visibleNearbyResults.length > 0 ? (
-                      <NearbyResultsCarousel title="Resultados" items={visibleNearbyResults} trails={trails} places={places} onAddTrail={handleAddTrail} onAddPlace={handleAddPlace} selectedItem={selectedNearbyResult} onSelect={setSelectedNearbyResult} />
+                      <NearbyResultsCarousel title="Resultados" items={visibleNearbyResults} trails={trails} places={places} selectedItem={selectedNearbyResult} onSelect={setSelectedNearbyResult} onAddTrail={handleAddTrail} onAddPlace={handleAddPlace} />
                     ) : (
                       !nearbyContentError && (
                         <div className="rounded-xl bg-surface-secondary p-5">
@@ -707,17 +690,7 @@ function TripDetail() {
         </section>
 
         {/* Meteorología */}
-        <section className="mt-16">
-          <h2 className="text-2xl font-bold tracking-tight text-text">Meteorología</h2>
-
-          <p className="mt-2 max-w-2xl leading-7 text-muted">Consulta la previsión para las fechas y la zona de tu escapada.</p>
-
-          <div className="mt-6 rounded-2xl border border-border bg-surface p-6">
-            <p className="font-medium text-text">Previsión pendiente</p>
-
-            <p className="mt-2 leading-7 text-muted">Cuando tengamos localizada la zona de la escapada podremos consultar aquí la previsión meteorológica.</p>
-          </div>
-        </section>
+        <TripWeather trip={trip} />
 
         {/* Notas */}
         <section className="mt-16">

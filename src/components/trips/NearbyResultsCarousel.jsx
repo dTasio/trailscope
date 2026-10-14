@@ -1,4 +1,24 @@
+import { useEffect, useRef } from "react";
+
 function NearbyResultsCarousel({ title, items, trails, places, selectedItem, onSelect, onAddTrail, onAddPlace }) {
+  const itemRefs = useRef(new Map());
+
+  useEffect(() => {
+    if (!selectedItem) {
+      return;
+    }
+
+    const selectedKey = selectedItem.resultType === "trail" ? `trail-${selectedItem.id}` : `place-${selectedItem.osmKey}`;
+
+    const selectedCard = itemRefs.current.get(selectedKey);
+
+    selectedCard?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  }, [selectedItem]);
+
   if (items.length === 0) {
     return null;
   }
@@ -13,7 +33,7 @@ function NearbyResultsCarousel({ title, items, trails, places, selectedItem, onS
     }
 
     if (item.resultType === "trail") {
-      return item.id === selectedItem.id;
+      return String(item.id) === String(selectedItem.id);
     }
 
     return item.osmKey === selectedItem.osmKey;
@@ -31,7 +51,7 @@ function NearbyResultsCarousel({ title, items, trails, places, selectedItem, onS
         {items.map((item) => {
           const isTrail = item.resultType === "trail";
 
-          const isAdded = isTrail ? trails.some((trail) => trail.id === item.id) : places.some((place) => place.osmKey === item.osmKey);
+          const isAdded = isTrail ? trails.some((trail) => String(trail.id) === String(item.id)) : places.some((place) => place.osmKey === item.osmKey);
 
           const isSelected = isSameItem(item);
 
@@ -47,7 +67,17 @@ function NearbyResultsCarousel({ title, items, trails, places, selectedItem, onS
           };
 
           return (
-            <article key={itemKey} className={`flex h-[96px] w-[175px] shrink-0 snap-start flex-col justify-between rounded-xl border bg-surface p-3 transition ${isSelected ? "border-primary shadow-sm" : "border-border hover:border-primary/50"}`}>
+            <article
+              key={itemKey}
+              ref={(element) => {
+                if (element) {
+                  itemRefs.current.set(itemKey, element);
+                } else {
+                  itemRefs.current.delete(itemKey);
+                }
+              }}
+              className={`flex h-[96px] w-[175px] shrink-0 snap-start flex-col justify-between rounded-xl border bg-surface p-3 transition ${isSelected ? "border-primary shadow-sm" : "border-border hover:border-primary/50"}`}
+            >
               <button type="button" onClick={() => onSelect(item)} className="text-left">
                 <h5 className="line-clamp-2 text-sm font-semibold leading-5 text-text">{item.name}</h5>
               </button>
