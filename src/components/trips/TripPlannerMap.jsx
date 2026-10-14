@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-import { Map, Marker, NavigationControl } from "maplibre-gl";
+import { LngLatBounds, Map, Marker, NavigationControl } from "maplibre-gl";
 
 import "maplibre-gl/dist/maplibre-gl.css";
 
@@ -10,7 +10,25 @@ const PLACE_MARKER_COLORS = {
   lake: "#06b6d4",
 };
 
-function TripPlannerMap({ destination, trails = [], places = [] }) {
+function extendBoundsFromCoordinates(bounds, coordinates) {
+  if (!Array.isArray(coordinates)) {
+    return;
+  }
+
+  const isCoordinate = coordinates.length >= 2 && typeof coordinates[0] === "number" && typeof coordinates[1] === "number";
+
+  if (isCoordinate) {
+    bounds.extend([coordinates[0], coordinates[1]]);
+
+    return;
+  }
+
+  coordinates.forEach((nestedCoordinates) => {
+    extendBoundsFromCoordinates(bounds, nestedCoordinates);
+  });
+}
+
+function TripPlannerMap({ destination, trails = [], places = [], selectedResult = null }) {
   const mapContainer = useRef(null);
 
   const mapRef = useRef(null);
@@ -19,10 +37,12 @@ function TripPlannerMap({ destination, trails = [], places = [] }) {
 
   const placeMarkersRef = useRef([]);
 
+  const selectedPlaceMarkerRef = useRef(null);
+
   const [isMapReady, setIsMapReady] = useState(false);
 
   /*
-   * Crear mapa una sola vez.
+   * Crear mapa.
    */
   useEffect(() => {
     if (!mapContainer.current) {
@@ -43,8 +63,7 @@ function TripPlannerMap({ destination, trails = [], places = [] }) {
 
     map.on("load", () => {
       /*
-       * Fuente inicialmente vacía
-       * para las rutas encontradas.
+       * Todas las rutas.
        */
       map.addSource("trip-trails", {
         type: "geojson",
@@ -56,9 +75,6 @@ function TripPlannerMap({ destination, trails = [], places = [] }) {
         },
       });
 
-      /*
-       * Capa visual de rutas.
-       */
       map.addLayer({
         id: "trip-trails-line",
 
@@ -77,7 +93,42 @@ function TripPlannerMap({ destination, trails = [], places = [] }) {
 
           "line-width": 4,
 
-          "line-opacity": 0.85,
+          "line-opacity": 0.65,
+        },
+      });
+
+      /*
+       * Ruta seleccionada.
+       */
+      map.addSource("selected-trip-trail", {
+        type: "geojson",
+
+        data: {
+          type: "FeatureCollection",
+
+          features: [],
+        },
+      });
+
+      map.addLayer({
+        id: "selected-trip-trail-line",
+
+        type: "line",
+
+        source: "selected-trip-trail",
+
+        layout: {
+          "line-join": "round",
+
+          "line-cap": "round",
+        },
+
+        paint: {
+          "line-color": "#c58b55",
+
+          "line-width": 7,
+
+          "line-opacity": 1,
         },
       });
 
@@ -89,7 +140,7 @@ function TripPlannerMap({ destination, trails = [], places = [] }) {
     return () => {
       placeMarkersRef.current.forEach((marker) => marker.remove());
 
-      placeMarkersRef.current = [];
+      selectedPlaceMarkerRef.current?.remove();
 
       destinationMarkerRef.current?.remove();
 
@@ -100,7 +151,7 @@ function TripPlannerMap({ destination, trails = [], places = [] }) {
   }, []);
 
   /*
-   * Destino seleccionado.
+   * Destino de la escapada.
    */
   useEffect(() => {
     const map = mapRef.current;
@@ -123,9 +174,7 @@ function TripPlannerMap({ destination, trails = [], places = [] }) {
       duration: 900,
     });
 
-    if (destinationMarkerRef.current) {
-      destinationMarkerRef.current.remove();
-    }
+    destinationMarkerRef.current?.remove();
 
     destinationMarkerRef.current = new Marker({
       color: "#2f5d50",
@@ -136,7 +185,7 @@ function TripPlannerMap({ destination, trails = [], places = [] }) {
   }, [destination, isMapReady]);
 
   /*
-   * Dibujar rutas encontradas.
+   * Rutas visibles.
    */
   useEffect(() => {
     const map = mapRef.current;
@@ -172,7 +221,7 @@ function TripPlannerMap({ destination, trails = [], places = [] }) {
   }, [trails, isMapReady]);
 
   /*
-   * Dibujar lugares encontrados.
+   * Lugares visibles.
    */
   useEffect(() => {
     const map = mapRef.current;
@@ -181,10 +230,6 @@ function TripPlannerMap({ destination, trails = [], places = [] }) {
       return;
     }
 
-    /*
-     * Quitamos los markers antiguos
-     * antes de pintar los nuevos.
-     */
     placeMarkersRef.current.forEach((marker) => marker.remove());
 
     placeMarkersRef.current = [];
@@ -203,7 +248,7 @@ function TripPlannerMap({ destination, trails = [], places = [] }) {
       const marker = new Marker({
         color: markerColor,
 
-        scale: 0.9,
+        scale: 0.85,
       })
         .setLngLat([longitude, latitude])
         .addTo(map);
@@ -211,6 +256,97 @@ function TripPlannerMap({ destination, trails = [], places = [] }) {
       placeMarkersRef.current.push(marker);
     });
   }, [places, isMapReady]);
+
+  /*
+   * Resultado seleccionado.
+   */
+  useEffect(() => {
+    const map = mapRef.current;
+
+    if (!map || !isMapReady) {
+      return;
+    }
+
+    const selectedTrailSource = map.getSource("selected-trip-trail");
+
+    /*
+     * Limpiar selección anterior.
+     */
+    if (selectedTrailSource) {
+      selectedTrailSource.setData({
+        type: "FeatureCollection",
+
+        features: [],
+      });
+    }
+
+    selectedPlaceMarkerRef.current?.remove();
+
+    selectedPlaceMarkerRef.current = null;
+
+    if (!selectedResult) {
+      return;
+    }
+
+    /*
+     * Lugar seleccionado.
+     */
+    if (selectedResult.resultType === "place") {
+      const longitude = selectedResult.coordinates?.longitude;
+
+      const latitude = selectedResult.coordinates?.latitude;
+
+      if (typeof longitude !== "number" || typeof latitude !== "number") {
+        return;
+      }
+
+      map.flyTo({
+        center: [longitude, latitude],
+
+        zoom: 14,
+
+        duration: 700,
+      });
+
+      selectedPlaceMarkerRef.current = new Marker({
+        color: "#c58b55",
+        scale: 1.25,
+      })
+        .setLngLat([longitude, latitude])
+        .addTo(map);
+
+      return;
+    }
+
+    /*
+     * Ruta seleccionada.
+     */
+    if (selectedResult.resultType === "trail" && selectedResult.geometry && selectedTrailSource) {
+      selectedTrailSource.setData({
+        type: "Feature",
+
+        properties: {
+          id: selectedResult.id,
+
+          name: selectedResult.name,
+        },
+
+        geometry: selectedResult.geometry,
+      });
+
+      const bounds = new LngLatBounds();
+
+      extendBoundsFromCoordinates(bounds, selectedResult.geometry.coordinates);
+
+      if (!bounds.isEmpty()) {
+        map.fitBounds(bounds, {
+          padding: 70,
+          maxZoom: 14,
+          duration: 700,
+        });
+      }
+    }
+  }, [selectedResult, isMapReady]);
 
   return <div ref={mapContainer} className="h-105 w-full overflow-hidden rounded-2xl border border-border lg:h-130" />;
 }

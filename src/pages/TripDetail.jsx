@@ -41,6 +41,12 @@ function getBoundsAroundLocation(latitude, longitude, radiusKm = 12) {
   };
 }
 
+const handleContentTypeChange = (nextContentType) => {
+  setContentType(nextContentType);
+
+  setSelectedNearbyResult(null);
+};
+
 function TripDetail() {
   const { id } = useParams();
 
@@ -80,6 +86,8 @@ function TripDetail() {
   const [nearbyContentError, setNearbyContentError] = useState("");
 
   const [hasSearchedNearbyContent, setHasSearchedNearbyContent] = useState(false);
+
+  const [selectedNearbyResult, setSelectedNearbyResult] = useState(null);
 
   /*
    * Ocultar mensaje del planificador.
@@ -287,6 +295,8 @@ function TripDetail() {
     setLocationSearchError("");
 
     setPlannerSuccessMessage(`Zona localizada: ${location.label}`);
+
+    setSelectedNearbyResult(null);
 
     void loadNearbyContent(location);
   };
@@ -542,15 +552,23 @@ function TripDetail() {
 
                 {/* Filtros */}
                 <div className="mt-3 flex flex-wrap gap-2">
-                  <button type="button" onClick={() => setContentType("all")} className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${contentType === "all" ? "bg-primary text-white" : "border border-border text-text hover:border-primary"}`}>
+                  <button type="button" onClick={() => handleContentTypeChange("all")} className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${contentType === "all" ? "bg-primary text-white" : "border border-border text-text hover:border-primary"}`}>
                     Todos
                   </button>
 
-                  <button type="button" onClick={() => setContentType("trails")} className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${contentType === "trails" ? "bg-primary text-white" : "border border-border text-text hover:border-primary"}`}>
+                  <button
+                    type="button"
+                    onClick={() => handleContentTypeChange("trails")}
+                    className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${contentType === "trails" ? "bg-primary text-white" : "border border-border text-text hover:border-primary"}`}
+                  >
                     Rutas
                   </button>
 
-                  <button type="button" onClick={() => setContentType("places")} className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${contentType === "places" ? "bg-primary text-white" : "border border-border text-text hover:border-primary"}`}>
+                  <button
+                    type="button"
+                    onClick={() => handleContentTypeChange("places")}
+                    className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${contentType === "places" ? "bg-primary text-white" : "border border-border text-text hover:border-primary"}`}
+                  >
                     Lugares
                   </button>
                 </div>
@@ -585,7 +603,7 @@ function TripDetail() {
             {/* Columna derecha */}
             <div className="min-w-0">
               {/* Mapa */}
-              <TripPlannerMap destination={trip.destination} trails={visibleNearbyTrails} places={visibleNearbyPlaces} />
+              <TripPlannerMap destination={trip.destination} trails={visibleNearbyTrails} places={visibleNearbyPlaces} selectedResult={selectedNearbyResult} />
 
               {/* Resultados */}
               <div className="mt-5 min-w-0">
@@ -600,7 +618,7 @@ function TripDetail() {
                 {!isLoadingNearbyContent && hasSearchedNearbyContent && (
                   <>
                     {visibleNearbyResults.length > 0 ? (
-                      <NearbyResultsCarousel title="Resultados" items={visibleNearbyResults} trails={trails} places={places} onAddTrail={handleAddTrail} onAddPlace={handleAddPlace} />
+                      <NearbyResultsCarousel title="Resultados" items={visibleNearbyResults} trails={trails} places={places} onAddTrail={handleAddTrail} onAddPlace={handleAddPlace} selectedItem={selectedNearbyResult} onSelect={setSelectedNearbyResult} />
                     ) : (
                       !nearbyContentError && (
                         <div className="rounded-xl bg-surface-secondary p-5">

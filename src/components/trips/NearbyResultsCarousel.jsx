@@ -1,14 +1,30 @@
-function NearbyResultsCarousel({ title, items, trails, places, onAddTrail, onAddPlace }) {
+function NearbyResultsCarousel({ title, items, trails, places, selectedItem, onSelect, onAddTrail, onAddPlace }) {
   if (items.length === 0) {
     return null;
   }
+
+  const isSameItem = (item) => {
+    if (!selectedItem) {
+      return false;
+    }
+
+    if (item.resultType !== selectedItem.resultType) {
+      return false;
+    }
+
+    if (item.resultType === "trail") {
+      return item.id === selectedItem.id;
+    }
+
+    return item.osmKey === selectedItem.osmKey;
+  };
 
   return (
     <section className="min-w-0">
       <div className="flex items-center justify-between gap-4">
         <h4 className="font-semibold text-text">{title}</h4>
 
-        <span className="text-sm text-muted">{items.length} busquedas</span>
+        <span className="text-sm text-muted">{items.length}</span>
       </div>
 
       <div className="mt-3 flex w-full snap-x snap-mandatory gap-3 overflow-x-auto pb-3">
@@ -16,6 +32,8 @@ function NearbyResultsCarousel({ title, items, trails, places, onAddTrail, onAdd
           const isTrail = item.resultType === "trail";
 
           const isAdded = isTrail ? trails.some((trail) => trail.id === item.id) : places.some((place) => place.osmKey === item.osmKey);
+
+          const isSelected = isSameItem(item);
 
           const itemKey = isTrail ? `trail-${item.id}` : `place-${item.osmKey}`;
 
@@ -29,8 +47,10 @@ function NearbyResultsCarousel({ title, items, trails, places, onAddTrail, onAdd
           };
 
           return (
-            <article key={itemKey} className="flex h-24 w-43.75 shrink-0 snap-start flex-col justify-between rounded-xl border border-border bg-surface p-3">
-              <h5 className="line-clamp-2 text-sm font-semibold leading-5 text-text">{item.name}</h5>
+            <article key={itemKey} className={`flex h-[96px] w-[175px] shrink-0 snap-start flex-col justify-between rounded-xl border bg-surface p-3 transition ${isSelected ? "border-primary shadow-sm" : "border-border hover:border-primary/50"}`}>
+              <button type="button" onClick={() => onSelect(item)} className="text-left">
+                <h5 className="line-clamp-2 text-sm font-semibold leading-5 text-text">{item.name}</h5>
+              </button>
 
               <button type="button" disabled={isAdded} onClick={handleAdd} className="text-left text-xs font-semibold text-primary transition-colors hover:text-primary-dark disabled:cursor-default disabled:text-muted">
                 {isAdded ? "✓ Añadido" : isTrail ? "+ Añadir ruta" : "+ Añadir lugar"}
