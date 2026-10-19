@@ -46,6 +46,14 @@ function AddToTripModal({ isOpen, onClose, item, type, onAdded }) {
     }
   };
 
+  const isItemAlreadyInTrip = (trip) => {
+    if (type === "trail") {
+      return (trip.trails ?? []).some((trail) => String(trail.id) === String(item.id));
+    }
+
+    return (trip.places ?? []).some((place) => place.osmKey === item.osmKey);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
       <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-xl">
@@ -55,9 +63,11 @@ function AddToTripModal({ isOpen, onClose, item, type, onAdded }) {
 
             <h2 className="mt-2 text-2xl font-bold tracking-tight text-text">Añadir a una escapada</h2>
 
-            <p className="mt-2 text-sm leading-6 text-muted">
-              Selecciona dónde quieres guardar <span className="font-semibold text-text">{item?.name}</span>.
-            </p>
+            <div className="mt-2">
+              <p className="text-sm leading-6 text-muted">Selecciona dónde quieres guardar</p>
+
+              <p className="mt-1 font-semibold leading-6 text-primary">{item?.name}</p>
+            </div>
           </div>
 
           <button type="button" onClick={handleClose} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xl text-muted transition-colors hover:bg-surface-secondary hover:text-text" aria-label="Cerrar">
@@ -77,28 +87,42 @@ function AddToTripModal({ isOpen, onClose, item, type, onAdded }) {
               <legend className="text-sm font-semibold text-text">Tus escapadas</legend>
 
               <div className="mt-3 space-y-2">
-                {trips.map((trip) => (
-                  <label key={trip.id} className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors ${selectedTripId === trip.id ? "border-primary bg-surface-secondary" : "border-border hover:border-primary/50"}`}>
-                    <input
-                      type="radio"
-                      name="trip"
-                      value={trip.id}
-                      checked={selectedTripId === trip.id}
-                      onChange={() => {
-                        setSelectedTripId(trip.id);
+                {trips.map((trip) => {
+                  const isAlreadyAdded = isItemAlreadyInTrip(trip);
 
-                        setError("");
-                      }}
-                      className="mt-1"
-                    />
+                  return (
+                    <label
+                      key={trip.id}
+                      className={`flex items-start gap-3 rounded-xl border p-4 transition-colors ${
+                        isAlreadyAdded ? "cursor-default border-primary bg-surface-secondary" : selectedTripId === trip.id ? "cursor-pointer border-primary bg-surface-secondary" : "cursor-pointer border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="trip"
+                        value={trip.id}
+                        disabled={isAlreadyAdded}
+                        checked={selectedTripId === trip.id}
+                        onChange={() => {
+                          setSelectedTripId(trip.id);
 
-                    <div>
-                      <p className="font-semibold text-text">{trip.name}</p>
+                          setError("");
+                        }}
+                        className="mt-1"
+                      />
 
-                      <p className="mt-1 text-sm text-muted">{trip.destination?.name || "Destino por definir"}</p>
-                    </div>
-                  </label>
-                ))}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className={`font-semibold ${isAlreadyAdded ? "text-primary" : "text-text"}`}>{trip.name}</p>
+
+                          {isAlreadyAdded && <span className="shrink-0 rounded-full bg-primary px-2.5 py-1 text-xs font-semibold text-white">✓ Añadida</span>}
+                        </div>
+
+                        <p className="mt-1 text-sm text-muted">{trip.destination?.name || "Destino por definir"}</p>
+                      </div>
+                    </label>
+                  );
+                })}
               </div>
             </fieldset>
 
