@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
+
 import { Link, useParams } from "react-router";
 
 import { getNaturalPlaceByKey } from "../services/placesService.js";
 
 import PlaceMap from "../components/places/PlaceMap.jsx";
+import AddToTripModal from "../components/trips/AddToTripModal.jsx";
+
 import placeDefaultImage from "../assets/images/place-default.jpg";
 
 import { formatAccess, formatDirection, formatPlaceName, formatPlaceType, formatWheelchair, formatYesNo } from "../utils/placeFormatters.js";
@@ -138,14 +141,24 @@ function PlaceDetail() {
   const { osmKey } = useParams();
 
   const [place, setPlace] = useState(null);
+
   const [isLoading, setIsLoading] = useState(true);
+
   const [error, setError] = useState(null);
 
   const [isPlaceFavorite, setIsPlaceFavorite] = useState(false);
 
+  const [isTripModalOpen, setIsTripModalOpen] = useState(false);
+
+  const [tripSuccessMessage, setTripSuccessMessage] = useState("");
+
+  /*
+   * Cargar lugar.
+   */
   useEffect(() => {
     const loadPlace = async () => {
       setIsLoading(true);
+
       setError(null);
 
       try {
@@ -163,8 +176,26 @@ function PlaceDetail() {
       }
     };
 
-    loadPlace();
+    void loadPlace();
   }, [osmKey]);
+
+  /*
+   * Ocultar confirmación
+   * de escapada.
+   */
+  useEffect(() => {
+    if (!tripSuccessMessage) {
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      setTripSuccessMessage("");
+    }, 3000);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [tripSuccessMessage]);
 
   if (isLoading) {
     return (
@@ -211,13 +242,17 @@ function PlaceDetail() {
 
     const favorite = {
       favoriteId,
+
       contentType: "place",
 
       osmKey: place.osmKey,
+
       name: place.name,
+
       type: place.type,
 
       elevation: place.elevation,
+
       coordinates: place.coordinates,
 
       image: place.image,
@@ -257,10 +292,16 @@ function PlaceDetail() {
               {isPlaceFavorite ? "♥ Guardado" : "♡ Guardar favorito"}
             </button>
 
-            <button type="button" className="rounded-full border border-border bg-surface px-5 py-2.5 font-semibold text-text transition-colors hover:border-primary hover:text-primary">
+            <button type="button" onClick={() => setIsTripModalOpen(true)} className="rounded-full border border-border bg-surface px-5 py-2.5 font-semibold text-text transition-colors hover:border-primary hover:text-primary">
               + Añadir a escapada
             </button>
           </div>
+
+          {tripSuccessMessage && (
+            <div className="mt-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-800" role="status">
+              ✓ {tripSuccessMessage}
+            </div>
+          )}
         </div>
 
         {/* Datos principales */}
@@ -331,6 +372,16 @@ function PlaceDetail() {
             </div>
           </section>
         )}
+
+        <AddToTripModal
+          isOpen={isTripModalOpen}
+          onClose={() => setIsTripModalOpen(false)}
+          item={place}
+          type="place"
+          onAdded={(trip) => {
+            setTripSuccessMessage(`Lugar añadido a "${trip.name}".`);
+          }}
+        />
       </section>
     </main>
   );

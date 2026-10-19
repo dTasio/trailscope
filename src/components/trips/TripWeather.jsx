@@ -164,7 +164,7 @@ function TripWeather({ trip }) {
 
           <div className="mt-6 flex w-full snap-x snap-mandatory gap-4 overflow-x-auto pb-3">
             {days.map((day) => (
-              <article key={day.date} className="w-[185px] shrink-0 snap-start rounded-2xl border border-border bg-surface p-5">
+              <article key={day.date} className="w-46.25 shrink-0 snap-start rounded-2xl border border-border bg-surface p-5">
                 <p className="text-sm font-semibold capitalize text-primary">{formatWeatherDate(day.date)}</p>
 
                 <p className="mt-3 min-h-12 font-semibold leading-6 text-text">{formatWeatherCode(day.weatherCode)}</p>

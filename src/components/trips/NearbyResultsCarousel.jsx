@@ -76,7 +76,7 @@ function NearbyResultsCarousel({ title, items, trails, places, selectedItem, onS
                   itemRefs.current.delete(itemKey);
                 }
               }}
-              className={`flex h-[96px] w-[175px] shrink-0 snap-start flex-col justify-between rounded-xl border bg-surface p-3 transition ${isSelected ? "border-primary shadow-sm" : "border-border hover:border-primary/50"}`}
+              className={`flex h-24 w-43.75 shrink-0 snap-start flex-col justify-between rounded-xl border bg-surface p-3 transition ${isSelected ? "border-primary shadow-sm" : "border-border hover:border-primary/50"}`}
             >
               <button type="button" onClick={() => onSelect(item)} className="text-left">
                 <h5 className="line-clamp-2 text-sm font-semibold leading-5 text-text">{item.name}</h5>
