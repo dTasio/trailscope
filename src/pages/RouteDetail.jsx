@@ -5,6 +5,7 @@ import { getHikingTrailById } from "../services/trailsService.js";
 
 import RouteMap from "../components/routes/RouteMap.jsx";
 import routeDefaultImage from "../assets/images/route-default.jpg";
+import AddToTripModal from "../components/trips/AddToTripModal.jsx";
 
 import { formatSurfaceValues, formatTrailVisibilityValues, formatSacScaleValues } from "../utils/trailFormatters.js";
 
@@ -64,6 +65,23 @@ function RouteDetail() {
   const [error, setError] = useState(null);
 
   const [isTrailFavorite, setIsTrailFavorite] = useState(false);
+
+  const [isTripModalOpen, setIsTripModalOpen] = useState(false);
+  const [tripSuccessMessage, setTripSuccessMessage] = useState("");
+
+  useEffect(() => {
+    if (!tripSuccessMessage) {
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      setTripSuccessMessage("");
+    }, 3000);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [tripSuccessMessage]);
 
   useEffect(() => {
     const loadTrail = async () => {
@@ -208,6 +226,12 @@ function RouteDetail() {
 
           {/* Acciones */}
           <div className="mt-6 flex flex-wrap gap-3">
+            {tripSuccessMessage && (
+              <div className="mt-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-800" role="status">
+                ✓ {tripSuccessMessage}
+              </div>
+            )}
+
             <button
               type="button"
               onClick={handleFavorite}
@@ -216,7 +240,7 @@ function RouteDetail() {
               {isTrailFavorite ? "♥ Guardado" : "♡ Guardar favorito"}
             </button>
 
-            <button type="button" className="rounded-full border border-border bg-surface px-5 py-2.5 font-semibold text-text transition-colors hover:border-primary hover:text-primary">
+            <button type="button" onClick={() => setIsTripModalOpen(true)} className="rounded-full border border-border bg-surface px-5 py-2.5 font-semibold text-text transition-colors hover:border-primary hover:text-primary">
               + Añadir a escapada
             </button>
 
@@ -329,6 +353,16 @@ function RouteDetail() {
             </div>
           </section>
         )}
+
+        <AddToTripModal
+          isOpen={isTripModalOpen}
+          onClose={() => setIsTripModalOpen(false)}
+          item={trail}
+          type="trail"
+          onAdded={(trip) => {
+            setTripSuccessMessage(`Ruta añadida a "${trip.name}".`);
+          }}
+        />
       </section>
     </main>
   );

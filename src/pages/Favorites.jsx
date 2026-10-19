@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
 import { Link } from "react-router";
 
 import { getFavorites, removeFavorite } from "../services/favoritesService.js";
+
+import AddToTripModal from "../components/trips/AddToTripModal.jsx";
 
 import routeDefaultImage from "../assets/images/route-default.jpg";
 import placeDefaultImage from "../assets/images/place-default.jpg";
@@ -11,17 +14,71 @@ import { formatPlaceName, formatPlaceType } from "../utils/placeFormatters.js";
 function Favorites() {
   const [favorites, setFavorites] = useState(() => getFavorites());
 
+  const [tripModalContent, setTripModalContent] = useState(null);
+
+  const [tripSuccessMessage, setTripSuccessMessage] = useState("");
+
   const trailFavorites = favorites.filter((favorite) => favorite.contentType === "trail");
 
   const placeFavorites = favorites.filter((favorite) => favorite.contentType === "place");
 
+  const hasFavorites = favorites.length > 0;
+
+  /*
+   * Ocultar confirmación
+   * automáticamente.
+   */
+  useEffect(() => {
+    if (!tripSuccessMessage) {
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      setTripSuccessMessage("");
+    }, 3000);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [tripSuccessMessage]);
+
+  /*
+   * Eliminar favorito.
+   */
   const handleRemoveFavorite = (favoriteId) => {
     const updatedFavorites = removeFavorite(favoriteId);
 
     setFavorites(updatedFavorites);
   };
 
-  const hasFavorites = favorites.length > 0;
+  /*
+   * Abrir el selector de
+   * escapadas para una ruta
+   * o un lugar.
+   */
+  const handleOpenTripModal = (item, type) => {
+    setTripModalContent({
+      item,
+      type,
+    });
+  };
+
+  /*
+   * Cerrar modal.
+   */
+  const handleCloseTripModal = () => {
+    setTripModalContent(null);
+  };
+
+  /*
+   * Confirmación al añadir
+   * contenido a una escapada.
+   */
+  const handleAddedToTrip = (trip) => {
+    const contentLabel = tripModalContent?.type === "trail" ? "Ruta" : "Lugar";
+
+    setTripSuccessMessage(`${contentLabel} añadido a "${trip.name}".`);
+  };
 
   return (
     <main>
@@ -49,6 +106,13 @@ function Favorites() {
             <p className="mt-1 text-sm text-muted">Lugares favoritos</p>
           </div>
         </div>
+
+        {/* Confirmación */}
+        {tripSuccessMessage && (
+          <div className="mt-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-semibold text-green-800" role="status">
+            ✓ {tripSuccessMessage}
+          </div>
+        )}
 
         {/* Estado vacío */}
         {!hasFavorites && (
@@ -88,6 +152,7 @@ function Favorites() {
                       {(trail.from || trail.to) && (
                         <p className="mt-2 text-sm leading-6 text-muted">
                           {trail.from ?? "Inicio"}
+
                           {trail.to && ` → ${trail.to}`}
                         </p>
                       )}
@@ -107,13 +172,20 @@ function Favorites() {
                         {trail.duration && <span>{trail.duration}</span>}
                       </div>
 
-                      <div className="mt-auto flex items-center justify-between gap-4 pt-6">
-                        <Link to={`/routes/${trail.id}`} className="font-semibold text-primary transition-colors hover:text-primary-dark">
-                          Ver detalle →
-                        </Link>
+                      {/* Acciones */}
+                      <div className="mt-auto pt-6">
+                        <div className="flex items-center justify-between gap-4">
+                          <Link to={`/routes/${trail.id}`} className="font-semibold text-primary transition-colors hover:text-primary-dark">
+                            Ver detalle →
+                          </Link>
 
-                        <button type="button" onClick={() => handleRemoveFavorite(trail.favoriteId)} className="text-sm font-medium text-muted transition-colors hover:text-red-700">
-                          Quitar
+                          <button type="button" onClick={() => handleRemoveFavorite(trail.favoriteId)} className="text-sm font-medium text-muted transition-colors hover:text-red-700">
+                            Quitar
+                          </button>
+                        </div>
+
+                        <button type="button" onClick={() => handleOpenTripModal(trail, "trail")} className="mt-4 w-full rounded-full border border-border px-4 py-2.5 text-sm font-semibold text-text transition-colors hover:border-primary hover:text-primary">
+                          + Añadir a escapada
                         </button>
                       </div>
                     </div>
@@ -151,13 +223,20 @@ function Favorites() {
 
                         {place.elevation !== null && place.elevation !== undefined && <p className="mt-3 text-sm text-muted">Altitud {place.elevation} m</p>}
 
-                        <div className="mt-auto flex items-center justify-between gap-4 pt-6">
-                          <Link to={`/places/${place.osmKey}`} className="font-semibold text-primary transition-colors hover:text-primary-dark">
-                            Ver detalle →
-                          </Link>
+                        {/* Acciones */}
+                        <div className="mt-auto pt-6">
+                          <div className="flex items-center justify-between gap-4">
+                            <Link to={`/places/${place.osmKey}`} className="font-semibold text-primary transition-colors hover:text-primary-dark">
+                              Ver detalle →
+                            </Link>
 
-                          <button type="button" onClick={() => handleRemoveFavorite(place.favoriteId)} className="text-sm font-medium text-muted transition-colors hover:text-red-700">
-                            Quitar
+                            <button type="button" onClick={() => handleRemoveFavorite(place.favoriteId)} className="text-sm font-medium text-muted transition-colors hover:text-red-700">
+                              Quitar
+                            </button>
+                          </div>
+
+                          <button type="button" onClick={() => handleOpenTripModal(place, "place")} className="mt-4 w-full rounded-full border border-border px-4 py-2.5 text-sm font-semibold text-text transition-colors hover:border-primary hover:text-primary">
+                            + Añadir a escapada
                           </button>
                         </div>
                       </div>
@@ -168,6 +247,9 @@ function Favorites() {
             </div>
           </section>
         )}
+
+        {/* Modal compartido */}
+        {tripModalContent && <AddToTripModal isOpen={true} onClose={handleCloseTripModal} item={tripModalContent.item} type={tripModalContent.type} onAdded={handleAddedToTrip} />}
       </section>
     </main>
   );
