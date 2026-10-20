@@ -11,6 +11,10 @@ import { formatSurfaceValues, formatTrailVisibilityValues, formatSacScaleValues 
 
 import { addFavorite, removeFavorite, isFavorite as checkIsFavorite } from "../services/favoritesService.js";
 
+import CompleteTrailModal from "../components/activity/CompleteTrailModal.jsx";
+
+import { isTrailCompleted as checkIsTrailCompleted } from "../services/completedTrailsService.js";
+
 function DetailMetric({ value, label }) {
   return (
     <div className="rounded-xl border border-border bg-surface p-4">
@@ -69,6 +73,10 @@ function RouteDetail() {
   const [isTripModalOpen, setIsTripModalOpen] = useState(false);
   const [tripSuccessMessage, setTripSuccessMessage] = useState("");
 
+  const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
+  const [isTrailCompleted, setIsTrailCompleted] = useState(false);
+  const [completedSuccessMessage, setCompletedSuccessMessage] = useState("");
+
   useEffect(() => {
     if (!tripSuccessMessage) {
       return;
@@ -93,6 +101,8 @@ function RouteDetail() {
 
         setTrail(trailData);
 
+        setIsTrailCompleted(checkIsTrailCompleted(trailData.id));
+
         const favoriteId = `trail-${trailData.id}`;
 
         setIsTrailFavorite(checkIsFavorite(favoriteId));
@@ -105,6 +115,20 @@ function RouteDetail() {
 
     loadTrail();
   }, [id]);
+
+  useEffect(() => {
+    if (!completedSuccessMessage) {
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      setCompletedSuccessMessage("");
+    }, 3000);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [completedSuccessMessage]);
 
   if (isLoading) {
     return (
@@ -244,10 +268,20 @@ function RouteDetail() {
               + Añadir a escapada
             </button>
 
-            <button type="button" className="rounded-full border border-border bg-surface px-5 py-2.5 font-semibold text-text transition-colors hover:border-primary hover:text-primary">
-              ✓ Marcar como completada
+            <button
+              type="button"
+              disabled={isTrailCompleted}
+              onClick={() => setIsCompleteModalOpen(true)}
+              className={`rounded-full border px-5 py-2.5 font-semibold transition-colors ${isTrailCompleted ? "cursor-default border-primary bg-surface-secondary text-primary" : "border-border bg-surface text-text hover:border-primary hover:text-primary"}`}
+            >
+              {isTrailCompleted ? "✓ Completada" : "✓ Marcar como completada"}
             </button>
           </div>
+          {completedSuccessMessage && (
+            <div className="mt-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-800" role="status">
+              ✓ {completedSuccessMessage}
+            </div>
+          )}
         </div>
 
         {/* Métricas principales */}
@@ -361,6 +395,16 @@ function RouteDetail() {
           type="trail"
           onAdded={(trip) => {
             setTripSuccessMessage(`Ruta añadida a "${trip.name}".`);
+          }}
+        />
+        <CompleteTrailModal
+          isOpen={isCompleteModalOpen}
+          onClose={() => setIsCompleteModalOpen(false)}
+          trail={trail}
+          onCompleted={() => {
+            setIsTrailCompleted(true);
+
+            setCompletedSuccessMessage("Ruta añadida a tu historial.");
           }}
         />
       </section>
