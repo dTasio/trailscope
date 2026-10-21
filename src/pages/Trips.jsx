@@ -68,29 +68,43 @@ function Trips() {
         )}
 
         {/* Explicación */}
-        <div className="mt-12 grid gap-5 md:grid-cols-3">
-          <div className="rounded-2xl border border-border bg-surface p-6">
-            <p className="text-sm font-semibold text-primary">01</p>
+        <div className="mt-10 rounded-3xl border border-[#c7d7cc] bg-surface px-6 py-7 sm:px-8">
+          <div className="grid gap-8 md:grid-cols-3">
+            <div className="relative">
+              <div className="flex items-start gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#315f49] text-sm font-bold text-white">01</div>
 
-            <h2 className="mt-3 text-lg font-semibold text-text">Elige fechas</h2>
+                <div>
+                  <h3 className="font-bold text-[#102d23]">Elige fechas</h3>
 
-            <p className="mt-2 leading-7 text-muted">Define cuándo quieres realizar tu próxima salida.</p>
-          </div>
+                  <p className="mt-2 text-sm leading-6 text-[#5d7065]">Define cuándo quieres realizar tu próxima salida.</p>
+                </div>
+              </div>
+            </div>
 
-          <div className="rounded-2xl border border-border bg-surface p-6">
-            <p className="text-sm font-semibold text-primary">02</p>
+            <div className="relative md:border-l md:border-[#c7d7cc] md:pl-8">
+              <div className="flex items-start gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#315f49] text-sm font-bold text-white">02</div>
 
-            <h2 className="mt-3 text-lg font-semibold text-text">Añade rutas y lugares</h2>
+                <div>
+                  <h3 className="font-bold text-[#102d23]">Añade rutas y lugares</h3>
 
-            <p className="mt-2 leading-7 text-muted">Agrupa todo lo que quieras visitar durante la escapada.</p>
-          </div>
+                  <p className="mt-2 text-sm leading-6 text-[#5d7065]">Agrupa todo lo que quieras visitar durante la escapada.</p>
+                </div>
+              </div>
+            </div>
 
-          <div className="rounded-2xl border border-border bg-surface p-6">
-            <p className="text-sm font-semibold text-primary">03</p>
+            <div className="relative md:border-l md:border-[#c7d7cc] md:pl-8">
+              <div className="flex items-start gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#315f49] text-sm font-bold text-white">03</div>
 
-            <h2 className="mt-3 text-lg font-semibold text-text">Organiza el plan</h2>
+                <div>
+                  <h3 className="font-bold text-[#102d23]">Organiza el plan</h3>
 
-            <p className="mt-2 leading-7 text-muted">Añade notas, consulta el tiempo y prepara tu salida.</p>
+                  <p className="mt-2 text-sm leading-6 text-[#5d7065]">Añade notas, consulta el tiempo y prepara tu salida.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

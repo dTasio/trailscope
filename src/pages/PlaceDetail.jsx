@@ -201,7 +201,13 @@ function PlaceDetail() {
     return (
       <main>
         <section className="mx-auto max-w-7xl px-6 py-10">
-          <p className="text-muted">Cargando lugar...</p>
+          <div className="flex min-h-80 items-center justify-center">
+            <div className="text-center">
+              <p className="font-semibold text-text">Cargando lugar</p>
+
+              <p className="mt-2 text-sm text-muted">Estamos preparando la información del lugar.</p>
+            </div>
+          </div>
         </section>
       </main>
     );
