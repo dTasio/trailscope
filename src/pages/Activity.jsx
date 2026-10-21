@@ -19,13 +19,13 @@ function Activity() {
   const [completedTrails, setCompletedTrails] = useState(() => getCompletedTrails());
 
   /*
-   * Ordenamos las rutas de más
-   * reciente a más antigua.
+   * Ordenamos de más reciente
+   * a más antigua.
    */
   const sortedCompletedTrails = [...completedTrails].sort((a, b) => b.completedDate.localeCompare(a.completedDate));
 
   /*
-   * Estadísticas generales.
+   * Estadísticas.
    */
   const totalCompleted = completedTrails.length;
 
@@ -33,9 +33,6 @@ function Activity() {
 
   const totalAscent = completedTrails.reduce((total, trail) => total + (Number(trail.ascent) || 0), 0);
 
-  /*
-   * Eliminar una ruta del historial.
-   */
   const handleRemoveCompleted = (completionId) => {
     const confirmed = window.confirm("¿Quieres quitar esta ruta de tu historial de completadas?");
 
@@ -64,13 +61,13 @@ function Activity() {
 
         {/* Estadísticas */}
         <div className="mt-10 grid gap-4 sm:grid-cols-3">
-          <article className="rounded-2xl border border-border bg-surface p-6">
+          <article className="rounded-2xl border border-border bg-surface p-6 text-center">
             <p className="text-3xl font-bold text-text">{totalCompleted}</p>
 
             <p className="mt-1 text-sm text-muted">Rutas completadas</p>
           </article>
 
-          <article className="rounded-2xl border border-border bg-surface p-6">
+          <article className="rounded-2xl border border-border bg-surface p-6 text-center">
             <p className="text-3xl font-bold text-text">
               {totalDistance.toLocaleString("es-ES", {
                 maximumFractionDigits: 1,
@@ -81,7 +78,7 @@ function Activity() {
             <p className="mt-1 text-sm text-muted">Distancia recorrida</p>
           </article>
 
-          <article className="rounded-2xl border border-border bg-surface p-6">
+          <article className="rounded-2xl border border-border bg-surface p-6 text-center">
             <p className="text-3xl font-bold text-text">{totalAscent.toLocaleString("es-ES")} m</p>
 
             <p className="mt-1 text-sm text-muted">Desnivel acumulado</p>
@@ -105,27 +102,28 @@ function Activity() {
 
         {/* Historial */}
         {hasCompletedTrails && (
-          <section className="mt-14">
+          <section className="mt-14 rounded-3xl border border-[#d6e3da] bg-surface p-6 sm:p-8">
+            {/* Cabecera */}
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">Historial</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#3f6b53]">Historial</p>
 
               <h2 className="mt-2 text-2xl font-bold tracking-tight text-text">Tus rutas realizadas</h2>
 
               <p className="mt-2 text-muted">Ordenadas desde la actividad más reciente.</p>
             </div>
 
-            <div className="mt-6 space-y-4">
+            {/* Rutas completadas */}
+            <div className="mt-7 space-y-3">
               {sortedCompletedTrails.map((trail) => (
-                <article key={trail.completionId} className="rounded-2xl border border-border bg-surface p-5 sm:p-6">
-                  <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+                <article key={trail.completionId} className="rounded-2xl bg-[#eef2ee] px-5 py-4 sm:px-6">
+                  <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                     {/* Información */}
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold uppercase tracking-[0.12em] text-primary">{formatCompletedDate(trail.completedDate)}</p>
+                      <p className="text-sm font-semibold uppercase tracking-[0.12em] text-[#3f6b53]">{formatCompletedDate(trail.completedDate)}</p>
 
                       <h3 className="mt-2 text-xl font-bold tracking-tight text-text">{trail.name}</h3>
 
-                      {/* Métricas relevantes */}
-                      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted">
+                      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted">
                         {trail.distance !== null && trail.distance !== undefined && (
                           <span>
                             {Number(trail.distance).toLocaleString("es-ES", {
@@ -140,15 +138,18 @@ function Activity() {
                     </div>
 
                     {/* Acciones */}
-                    <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:min-w-[150px]">
-                      <Link to={`/routes/${trail.trailId}`} className="flex min-h-11 items-center justify-center rounded-full border border-border px-5 py-2.5 text-sm font-semibold text-primary transition-colors hover:border-primary hover:bg-surface-secondary">
+                    <div className="flex w-full shrink-0 flex-col gap-2 sm:w-37.5">
+                      <Link
+                        to={`/routes/${trail.trailId}`}
+                        className="flex min-h-11 w-full items-center justify-center rounded-xl border border-[#c7d7cc] bg-surface px-4 py-2.5 text-sm font-semibold text-[#315f49] transition-colors hover:border-[#8eae99] hover:bg-[#edf4ef] hover:text-[#244b39]"
+                      >
                         Ver detalle →
                       </Link>
 
                       <button
                         type="button"
                         onClick={() => handleRemoveCompleted(trail.completionId)}
-                        className="min-h-11 rounded-full border border-border px-5 py-2.5 text-sm font-semibold text-muted transition-colors hover:border-red-300 hover:bg-red-50 hover:text-red-700"
+                        className="min-h-11 w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-semibold text-muted transition-colors hover:border-red-300 hover:bg-red-50 hover:text-red-700"
                       >
                         Quitar
                       </button>

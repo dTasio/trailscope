@@ -86,11 +86,6 @@ function TripDetail() {
 
   /*
    * Cambiar filtro.
-   *
-   * IMPORTANTE:
-   * esta función debe estar dentro
-   * de TripDetail porque utiliza
-   * estados del componente.
    */
   const handleContentTypeChange = (nextContentType) => {
     setContentType(nextContentType);
@@ -99,7 +94,8 @@ function TripDetail() {
   };
 
   /*
-   * Ocultar mensaje del planificador.
+   * Ocultar mensaje
+   * del planificador.
    */
   useEffect(() => {
     if (!plannerSuccessMessage) {
@@ -116,7 +112,8 @@ function TripDetail() {
   }, [plannerSuccessMessage]);
 
   /*
-   * Ocultar mensaje de notas.
+   * Ocultar mensaje
+   * de notas.
    */
   useEffect(() => {
     if (!notesSuccessMessage) {
@@ -307,6 +304,7 @@ function TripDetail() {
 
     const trailSnapshot = {
       id: trail.id,
+
       name: trail.name,
 
       distance: trail.distance,
@@ -421,310 +419,341 @@ function TripDetail() {
     <main>
       <section className="mx-auto max-w-7xl px-6 py-10 sm:py-14">
         {/* Volver */}
-        <Link to="/trips" className="text-sm font-semibold text-primary transition-colors hover:text-primary-dark">
+        <Link to="/trips" className="inline-flex min-h-10 items-center font-semibold text-primary transition-colors hover:text-primary-dark">
           ← Volver a escapadas
         </Link>
 
-        {/* Cabecera */}
-        <div className="mt-8 flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-3xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">{trip.destination?.name || "Destino por definir"}</p>
+        {/* Fondo general de la escapada */}
+        <div className="mt-5">
+          {/* Cabecera */}
+          <header className="rounded-3xl border border-[#d6e3da] bg-surface p-6 sm:p-8">
+            <div className="flex flex-col gap-7 lg:flex-row lg:items-start lg:justify-between">
+              <div className="max-w-3xl">
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#3f6b53]">{trip.destination?.name || "Destino por definir"}</p>
 
-            <h1 className="mt-3 text-4xl font-bold tracking-tight text-text sm:text-5xl">{trip.name}</h1>
+                <h1 className="mt-3 text-4xl font-bold tracking-tight text-text sm:text-5xl">{trip.name}</h1>
 
-            <p className="mt-4 text-lg text-muted">
-              {formatDate(trip.startDate)}
+                {/* Fechas */}
+                <div className="mt-5 inline-flex rounded-2xl border border-[#d6e3da] bg-[#f7faf8] px-4 py-3">
+                  <p className="font-medium text-[#52675b]">
+                    {formatDate(trip.startDate)}
 
-              {" → "}
+                    {" → "}
 
-              {formatDate(trip.endDate)}
-            </p>
-          </div>
-
-          {/* Resumen */}
-          <div className="flex flex-wrap gap-3">
-            <span className="rounded-full bg-surface-secondary px-4 py-2 text-sm font-medium text-muted">
-              {trails.length} {trails.length === 1 ? "ruta" : "rutas"}
-            </span>
-
-            <span className="rounded-full bg-surface-secondary px-4 py-2 text-sm font-medium text-muted">
-              {places.length} {places.length === 1 ? "lugar" : "lugares"}
-            </span>
-          </div>
-        </div>
-
-        {/* Planificador */}
-        <section className="mt-12">
-          <div className="mb-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-primary">Planificador</p>
-
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-text">Prepara tu escapada</h2>
-
-            <p className="mt-3 max-w-2xl leading-7 text-muted">Explora la zona, añade rutas y lugares y organiza todo lo que quieres hacer durante la salida.</p>
-          </div>
-
-          {plannerSuccessMessage && (
-            <div className="mb-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-semibold text-green-800" role="status">
-              ✓ {plannerSuccessMessage}
-            </div>
-          )}
-
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.4fr)]">
-            {/* Panel izquierdo */}
-            <div className="min-w-0 rounded-2xl border border-border bg-surface p-6">
-              <h3 className="text-xl font-bold text-text">Explorar zona</h3>
-
-              <p className="mt-2 leading-7 text-muted">Busca una ciudad, pueblo o zona natural para encontrar rutas y lugares cercanos.</p>
-
-              {/* Buscador */}
-              <div className="mt-6">
-                <label htmlFor="trip-search" className="font-medium text-text">
-                  Buscar zona
-                </label>
-
-                <p className="mt-1 text-sm leading-6 text-muted">Busca una localidad cercana a la zona que quieres explorar.</p>
-
-                <form onSubmit={handleLocationSearch} className="mt-3 flex gap-2">
-                  <input
-                    id="trip-search"
-                    type="search"
-                    value={searchTerm}
-                    onChange={(event) => {
-                      setSearchTerm(event.target.value);
-
-                      setLocationSearchError("");
-                    }}
-                    placeholder="Torla, Biescas, Sallent..."
-                    className="min-w-0 flex-1 rounded-xl border border-border bg-background px-4 py-3 text-text outline-none transition focus:border-primary"
-                  />
-
-                  <button type="submit" disabled={isSearchingLocation} className="shrink-0 rounded-xl bg-primary px-5 py-3 font-semibold text-white transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60">
-                    {isSearchingLocation ? "Buscando..." : "Buscar"}
-                  </button>
-                </form>
-
-                {locationSearchError && (
-                  <p className="mt-3 text-sm font-medium text-red-700" role="alert">
-                    {locationSearchError}
+                    {formatDate(trip.endDate)}
                   </p>
+                </div>
+              </div>
+
+              {/* Resumen */}
+              <div className="flex flex-wrap gap-3 lg:justify-end">
+                <span className="rounded-full bg-[#dfece2] px-4 py-2 text-sm font-semibold text-[#365947]">
+                  {trails.length} {trails.length === 1 ? "ruta" : "rutas"}
+                </span>
+
+                <span className="rounded-full bg-[#dfece2] px-4 py-2 text-sm font-semibold text-[#365947]">
+                  {places.length} {places.length === 1 ? "lugar" : "lugares"}
+                </span>
+              </div>
+            </div>
+          </header>
+
+          {/* Planificador */}
+          <section className="mt-8 rounded-3xl border border-[#d6e3da] bg-surface p-6 sm:p-8">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#3f6b53]">Planificador</p>
+
+              <h2 className="mt-2 text-3xl font-bold tracking-tight text-text">Prepara tu escapada</h2>
+
+              <p className="mt-3 max-w-2xl leading-7 text-muted">Explora la zona, añade rutas y lugares y organiza todo lo que quieres hacer durante la salida.</p>
+            </div>
+
+            {/* Mensaje */}
+            {plannerSuccessMessage && (
+              <div className="mt-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-semibold text-green-800" role="status">
+                ✓ {plannerSuccessMessage}
+              </div>
+            )}
+
+            {/* Planificador */}
+            <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.4fr)]">
+              {/* Panel izquierdo */}
+              <div className="min-w-0 rounded-2xl border border-[#d6e3da] bg-[#f8fbf9] p-6">
+                <h3 className="text-xl font-bold text-text">Explorar zona</h3>
+
+                <p className="mt-2 leading-7 text-muted">Busca una ciudad, pueblo o zona natural para encontrar rutas y lugares cercanos.</p>
+
+                {/* Buscador */}
+                <div className="mt-6">
+                  <label htmlFor="trip-search" className="font-medium text-text">
+                    Buscar zona
+                  </label>
+
+                  <p className="mt-1 text-sm leading-6 text-muted">Busca una localidad cercana a la zona que quieres explorar.</p>
+
+                  <form onSubmit={handleLocationSearch} className="mt-3 flex gap-2">
+                    <input
+                      id="trip-search"
+                      type="search"
+                      value={searchTerm}
+                      onChange={(event) => {
+                        setSearchTerm(event.target.value);
+
+                        setLocationSearchError("");
+                      }}
+                      placeholder="Torla, Biescas, Sallent..."
+                      className="min-w-0 flex-1 rounded-xl border border-[#d6e3da] bg-surface px-4 py-3 text-text outline-none transition focus:border-[#315f49]"
+                    />
+
+                    <button type="submit" disabled={isSearchingLocation} className="shrink-0 rounded-xl bg-[#315f49] px-5 py-3 font-semibold text-white transition-colors hover:bg-[#244b39] disabled:cursor-not-allowed disabled:opacity-60">
+                      {isSearchingLocation ? "Buscando..." : "Buscar"}
+                    </button>
+                  </form>
+
+                  {/* Error */}
+                  {locationSearchError && (
+                    <p className="mt-3 text-sm font-medium text-red-700" role="alert">
+                      {locationSearchError}
+                    </p>
+                  )}
+
+                  {/* Resultados de localidades */}
+                  {locationResults.length > 0 && (
+                    <div className="mt-4 overflow-hidden rounded-xl border border-[#d6e3da] bg-surface">
+                      {locationResults.map((location) => (
+                        <button key={location.id} type="button" onClick={() => handleSelectLocation(location)} className="flex w-full items-start justify-between gap-4 border-b border-[#d6e3da] px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-[#edf4ef]">
+                          <div>
+                            <p className="font-semibold text-text">{location.name}</p>
+
+                            <p className="mt-1 text-sm text-muted">{location.label}</p>
+                          </div>
+
+                          <span className="text-[#315f49]">→</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Zona localizada */}
+                {hasDestinationCoordinates && (
+                  <div className="mt-5 rounded-xl border border-[#d6e3da] bg-[#edf4ef] p-4">
+                    <p className="text-sm font-semibold text-[#3f6b53]">Zona localizada</p>
+
+                    <p className="mt-1 font-medium text-text">{trip.destination.locationLabel || trip.destination.name}</p>
+                  </div>
                 )}
 
-                {locationResults.length > 0 && (
-                  <div className="mt-4 overflow-hidden rounded-xl border border-border bg-background">
-                    {locationResults.map((location) => (
-                      <button key={location.id} type="button" onClick={() => handleSelectLocation(location)} className="flex w-full items-start justify-between gap-4 border-b border-border px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-surface-secondary">
-                        <div>
-                          <p className="font-semibold text-text">{location.name}</p>
+                {/* Contenido */}
+                <div className="mt-8 border-t border-[#d6e3da] pt-6">
+                  <p className="font-semibold text-text">Contenido</p>
 
-                          <p className="mt-1 text-sm text-muted">{location.label}</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleContentTypeChange("all")}
+                      className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${contentType === "all" ? "bg-[#315f49] text-white" : "border border-[#c7d7cc] bg-surface text-text hover:border-[#8eae99] hover:bg-[#edf4ef]"}`}
+                    >
+                      Todos
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleContentTypeChange("trails")}
+                      className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${contentType === "trails" ? "bg-[#315f49] text-white" : "border border-[#c7d7cc] bg-surface text-text hover:border-[#8eae99] hover:bg-[#edf4ef]"}`}
+                    >
+                      Rutas
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleContentTypeChange("places")}
+                      className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${contentType === "places" ? "bg-[#315f49] text-white" : "border border-[#c7d7cc] bg-surface text-text hover:border-[#8eae99] hover:bg-[#edf4ef]"}`}
+                    >
+                      Lugares
+                    </button>
+                  </div>
+
+                  {/* Explicación */}
+                  {hasSearchedNearbyContent && !isLoadingNearbyContent && visibleNearbyResults.length > 0 && (
+                    <div className="mt-5 rounded-xl bg-[#edf4ef] p-4">
+                      <p className="text-sm leading-6 text-muted">
+                        Añade las rutas y lugares que te interesen a tu escapada desde el botón <span className="font-semibold text-text">Añadir</span>.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Error API */}
+                  {nearbyContentError && (
+                    <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-medium text-amber-800" role="status">
+                      {nearbyContentError}
+                    </div>
+                  )}
+
+                  {/* Estado inicial */}
+                  {!hasSearchedNearbyContent && !isLoadingNearbyContent && (
+                    <div className="mt-5 rounded-xl bg-[#edf4ef] p-4">
+                      <p className="font-medium text-text">Busca una zona para empezar</p>
+
+                      <p className="mt-2 text-sm leading-6 text-muted">Los resultados aparecerán junto al mapa.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Mapa + resultados */}
+              <div className="min-w-0">
+                <TripPlannerMap destination={trip.destination} trails={visibleNearbyTrails} places={visibleNearbyPlaces} selectedResult={selectedNearbyResult} onSelectResult={setSelectedNearbyResult} />
+
+                <div className="mt-5 min-w-0">
+                  {isLoadingNearbyContent && (
+                    <div className="rounded-xl bg-[#edf4ef] p-5">
+                      <p className="font-medium text-text">Buscando rutas y lugares...</p>
+
+                      <p className="mt-2 text-sm leading-6 text-muted">Estamos consultando el contenido disponible en esta zona.</p>
+                    </div>
+                  )}
+
+                  {!isLoadingNearbyContent && hasSearchedNearbyContent && (
+                    <>
+                      {visibleNearbyResults.length > 0 ? (
+                        <NearbyResultsCarousel title="Resultados" items={visibleNearbyResults} trails={trails} places={places} selectedItem={selectedNearbyResult} onSelect={setSelectedNearbyResult} onAddTrail={handleAddTrail} onAddPlace={handleAddPlace} />
+                      ) : (
+                        !nearbyContentError && (
+                          <div className="rounded-xl bg-[#edf4ef] p-5">
+                            <p className="font-medium text-text">No hemos encontrado contenido</p>
+
+                            <p className="mt-2 text-sm leading-6 text-muted">Prueba buscando otra localidad cercana o seleccionando otro tipo de contenido.</p>
+                          </div>
+                        )
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Tu plan */}
+          <section className="mt-8 rounded-3xl border border-[#d6e3da] bg-surface p-6 sm:p-8">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#3f6b53]">Organización</p>
+
+              <h2 className="mt-2 text-2xl font-bold tracking-tight text-text">Tu plan</h2>
+
+              <p className="mt-2 text-muted">Rutas y lugares que has añadido a esta escapada.</p>
+            </div>
+
+            <div className="mt-7 grid gap-6 lg:grid-cols-2">
+              {/* Rutas */}
+              <div className="rounded-2xl border border-[#d6e3da] bg-[#f8fbf9] p-5 sm:p-6">
+                <div className="flex items-center justify-between gap-4">
+                  <h3 className="text-xl font-bold text-text">Rutas</h3>
+
+                  <span className="rounded-full bg-[#dfece2] px-3 py-1.5 text-sm font-semibold text-[#365947]">{trails.length}</span>
+                </div>
+
+                {trails.length === 0 ? (
+                  <p className="mt-5 leading-7 text-muted">Todavía no has añadido ninguna ruta.</p>
+                ) : (
+                  <div className="mt-5 space-y-3">
+                    {trails.map((trail) => (
+                      <article key={trail.id} className="flex items-center justify-between gap-4 rounded-xl bg-[#eef2ee] px-4 py-3">
+                        {/* Información */}
+                        <div className="min-w-0">
+                          <p className="font-semibold leading-6 text-text">{trail.name}</p>
+
+                          <div className="mt-0.5 flex flex-wrap gap-x-3 text-sm text-muted">
+                            {trail.distance !== null && trail.distance !== undefined && <span>{trail.distance} km</span>}
+
+                            {trail.ascent !== null && trail.ascent !== undefined && <span>+{trail.ascent} m</span>}
+                          </div>
                         </div>
 
-                        <span className="text-primary">→</span>
-                      </button>
+                        {/* Quitar */}
+                        <button type="button" onClick={() => handleRemoveTrail(trail.id)} className="inline-flex min-h-10 shrink-0 items-center rounded-lg px-3 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 hover:text-red-800">
+                          Quitar
+                        </button>
+                      </article>
                     ))}
                   </div>
                 )}
               </div>
 
-              {/* Zona localizada */}
-              {hasDestinationCoordinates && (
-                <div className="mt-5 rounded-xl bg-surface-secondary p-4">
-                  <p className="text-sm font-semibold text-primary">Zona localizada</p>
+              {/* Lugares */}
+              <div className="rounded-2xl border border-[#d6e3da] bg-[#f8fbf9] p-5 sm:p-6">
+                <div className="flex items-center justify-between gap-4">
+                  <h3 className="text-xl font-bold text-text">Lugares</h3>
 
-                  <p className="mt-1 font-medium text-text">{trip.destination.locationLabel || trip.destination.name}</p>
-                </div>
-              )}
-
-              {/* Contenido */}
-              <div className="mt-8 border-t border-border pt-6">
-                <p className="font-semibold text-text">Contenido</p>
-
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <button type="button" onClick={() => handleContentTypeChange("all")} className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${contentType === "all" ? "bg-primary text-white" : "border border-border text-text hover:border-primary"}`}>
-                    Todos
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleContentTypeChange("trails")}
-                    className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${contentType === "trails" ? "bg-primary text-white" : "border border-border text-text hover:border-primary"}`}
-                  >
-                    Rutas
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleContentTypeChange("places")}
-                    className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${contentType === "places" ? "bg-primary text-white" : "border border-border text-text hover:border-primary"}`}
-                  >
-                    Lugares
-                  </button>
+                  <span className="rounded-full bg-[#dfece2] px-3 py-1.5 text-sm font-semibold text-[#365947]">{places.length}</span>
                 </div>
 
-                {hasSearchedNearbyContent && !isLoadingNearbyContent && visibleNearbyResults.length > 0 && (
-                  <div className="mt-5 rounded-xl bg-surface-secondary p-4">
-                    <p className="text-sm leading-6 text-muted">
-                      Añade las rutas y lugares que te interesen a tu escapada desde el botón <span className="font-semibold text-text">Añadir</span>.
-                    </p>
-                  </div>
-                )}
+                {places.length === 0 ? (
+                  <p className="mt-5 leading-7 text-muted">Todavía no has añadido ningún lugar.</p>
+                ) : (
+                  <div className="mt-5 space-y-3">
+                    {places.map((place) => (
+                      <article key={place.osmKey} className="flex items-center justify-between gap-4 rounded-xl bg-[#eef2ee] px-4 py-3">
+                        {/* Información */}
+                        <div className="min-w-0">
+                          <p className="font-semibold leading-6 text-text">{place.name}</p>
 
-                {nearbyContentError && (
-                  <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-medium text-amber-800" role="status">
-                    {nearbyContentError}
-                  </div>
-                )}
-
-                {!hasSearchedNearbyContent && !isLoadingNearbyContent && (
-                  <div className="mt-5 rounded-xl bg-surface-secondary p-4">
-                    <p className="font-medium text-text">Busca una zona para empezar</p>
-
-                    <p className="mt-2 text-sm leading-6 text-muted">Los resultados aparecerán junto al mapa.</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Mapa + resultados */}
-            <div className="min-w-0">
-              <TripPlannerMap destination={trip.destination} trails={visibleNearbyTrails} places={visibleNearbyPlaces} selectedResult={selectedNearbyResult} onSelectResult={setSelectedNearbyResult} />
-
-              <div className="mt-5 min-w-0">
-                {isLoadingNearbyContent && (
-                  <div className="rounded-xl bg-surface-secondary p-5">
-                    <p className="font-medium text-text">Buscando rutas y lugares...</p>
-
-                    <p className="mt-2 text-sm leading-6 text-muted">Estamos consultando el contenido disponible en esta zona.</p>
-                  </div>
-                )}
-
-                {!isLoadingNearbyContent && hasSearchedNearbyContent && (
-                  <>
-                    {visibleNearbyResults.length > 0 ? (
-                      <NearbyResultsCarousel title="Resultados" items={visibleNearbyResults} trails={trails} places={places} selectedItem={selectedNearbyResult} onSelect={setSelectedNearbyResult} onAddTrail={handleAddTrail} onAddPlace={handleAddPlace} />
-                    ) : (
-                      !nearbyContentError && (
-                        <div className="rounded-xl bg-surface-secondary p-5">
-                          <p className="font-medium text-text">No hemos encontrado contenido</p>
-
-                          <p className="mt-2 text-sm leading-6 text-muted">Prueba buscando otra localidad cercana o seleccionando otro tipo de contenido.</p>
+                          {place.elevation !== null && place.elevation !== undefined && <p className="mt-0.5 text-sm text-muted">Altitud {place.elevation} m</p>}
                         </div>
-                      )
-                    )}
-                  </>
+
+                        {/* Quitar */}
+                        <button type="button" onClick={() => handleRemovePlace(place.osmKey)} className="inline-flex min-h-10 shrink-0 items-center rounded-lg px-3 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 hover:text-red-800">
+                          Quitar
+                        </button>
+                      </article>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
+          </section>
+
+          {/* Meteorología */}
+          <div className="mt-8 rounded-3xl border border-[#d6e3da] bg-surface px-6 pb-8 sm:px-8 [&>section]:mt-0 [&>section]:pt-8">
+            <TripWeather trip={trip} />
           </div>
-        </section>
 
-        {/* Tu plan */}
-        <section className="mt-16">
-          <h2 className="text-2xl font-bold tracking-tight text-text">Tu plan</h2>
+          {/* Notas */}
+          <section className="mt-8 rounded-3xl border border-[#d6e3da] bg-surface p-6 sm:p-8">
+            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#3f6b53]">Organización</p>
 
-          <p className="mt-2 text-muted">Rutas y lugares que has añadido a esta escapada.</p>
+            <h2 className="mt-2 text-2xl font-bold tracking-tight text-text">Notas</h2>
 
-          <div className="mt-6 grid gap-6 lg:grid-cols-2">
-            {/* Rutas */}
-            <div className="rounded-2xl border border-border bg-surface p-6">
-              <div className="flex items-center justify-between gap-4">
-                <h3 className="text-xl font-semibold text-text">Rutas</h3>
+            <p className="mt-2 max-w-2xl leading-7 text-muted">Guarda cualquier información que necesites recordar para esta salida.</p>
 
-                <span className="text-sm text-muted">{trails.length}</span>
+            <div className="mt-6 rounded-2xl border border-[#d6e3da] bg-[#f8fbf9] p-5 sm:p-6">
+              <label htmlFor="trip-notes" className="sr-only">
+                Notas de la escapada
+              </label>
+
+              <textarea
+                id="trip-notes"
+                value={notes}
+                onChange={(event) => setNotes(event.target.value)}
+                rows="6"
+                placeholder="Alojamiento, material, horarios, recordatorios..."
+                className="w-full resize-y rounded-xl border border-[#d6e3da] bg-[#eef2ee] px-4 py-3 leading-7 text-text outline-none transition-colors placeholder:text-muted focus:border-[#315f49] focus:bg-surface"
+              />
+
+              <div className="mt-4 flex justify-end">
+                <button type="button" onClick={handleSaveNotes} className="rounded-full bg-[#315f49] px-5 py-2.5 font-semibold text-white transition-colors hover:bg-[#244b39]">
+                  Guardar notas
+                </button>
               </div>
-
-              {trails.length === 0 ? (
-                <p className="mt-5 leading-7 text-muted">Todavía no has añadido ninguna ruta.</p>
-              ) : (
-                <div className="mt-5 space-y-3">
-                  {trails.map((trail) => (
-                    <article key={trail.id} className="flex items-start justify-between gap-4 rounded-xl bg-surface-secondary p-4">
-                      <div className="min-w-0">
-                        <p className="font-semibold text-text">{trail.name}</p>
-
-                        <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm text-muted">
-                          {trail.distance !== null && trail.distance !== undefined && <span>{trail.distance} km</span>}
-
-                          {trail.ascent !== null && trail.ascent !== undefined && <span>+{trail.ascent} m</span>}
-                        </div>
-                      </div>
-
-                      <button type="button" onClick={() => handleRemoveTrail(trail.id)} className="shrink-0 text-sm font-semibold text-red-700 transition-colors hover:text-red-900">
-                        Quitar
-                      </button>
-                    </article>
-                  ))}
-                </div>
-              )}
             </div>
 
-            {/* Lugares */}
-            <div className="rounded-2xl border border-border bg-surface p-6">
-              <div className="flex items-center justify-between gap-4">
-                <h3 className="text-xl font-semibold text-text">Lugares</h3>
-
-                <span className="text-sm text-muted">{places.length}</span>
+            {notesSuccessMessage && (
+              <div className="mt-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-800" role="status">
+                ✓ {notesSuccessMessage}
               </div>
-
-              {places.length === 0 ? (
-                <p className="mt-5 leading-7 text-muted">Todavía no has añadido ningún lugar.</p>
-              ) : (
-                <div className="mt-5 space-y-3">
-                  {places.map((place) => (
-                    <article key={place.osmKey} className="flex items-start justify-between gap-4 rounded-xl bg-surface-secondary p-4">
-                      <div className="min-w-0">
-                        <p className="font-semibold text-text">{place.name}</p>
-
-                        {place.elevation !== null && place.elevation !== undefined && <p className="mt-1 text-sm text-muted">Altitud {place.elevation} m</p>}
-                      </div>
-
-                      <button type="button" onClick={() => handleRemovePlace(place.osmKey)} className="shrink-0 text-sm font-semibold text-red-700 transition-colors hover:text-red-900">
-                        Quitar
-                      </button>
-                    </article>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* Meteorología */}
-        <TripWeather trip={trip} />
-
-        {/* Notas */}
-        <section className="mt-16">
-          <h2 className="text-2xl font-bold tracking-tight text-text">Notas</h2>
-
-          <p className="mt-2 max-w-2xl leading-7 text-muted">Guarda cualquier información que necesites recordar para esta salida.</p>
-
-          <div className="mt-6 rounded-2xl border border-border bg-surface p-6">
-            <label htmlFor="trip-notes" className="sr-only">
-              Notas de la escapada
-            </label>
-
-            <textarea
-              id="trip-notes"
-              value={notes}
-              onChange={(event) => setNotes(event.target.value)}
-              rows="6"
-              placeholder="Alojamiento, material, horarios, recordatorios..."
-              className="w-full resize-y rounded-xl border border-border bg-background px-4 py-3 leading-7 text-text outline-none transition focus:border-primary"
-            />
-
-            <div className="mt-4 flex justify-end">
-              <button type="button" onClick={handleSaveNotes} className="rounded-full bg-primary px-5 py-2.5 font-semibold text-white transition-colors hover:bg-primary-dark">
-                Guardar notas
-              </button>
-            </div>
-          </div>
-
-          {notesSuccessMessage && (
-            <div className="mt-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-800" role="status">
-              ✓ {notesSuccessMessage}
-            </div>
-          )}
-        </section>
+            )}
+          </section>
+        </div>
       </section>
     </main>
   );

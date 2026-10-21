@@ -23,22 +23,24 @@ function App() {
   }, [pathname]);
 
   return (
-    <>
+    <div className="flex min-h-screen flex-col">
       <Header />
 
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/explore" element={<Explore />} />
-        <Route path="/routes/:id" element={<RouteDetail />} />
-        <Route path="/places/:osmKey" element={<PlaceDetail />} />
-        <Route path="/favorites" element={<Favorites />} />
-        <Route path="/trips" element={<Trips />} />
-        <Route path="/activity" element={<Activity />} />
-        <Route path="/trips/:id" element={<TripDetail />} />
-      </Routes>
+      <div className="flex-1">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/explore" element={<Explore />} />
+          <Route path="/routes/:id" element={<RouteDetail />} />
+          <Route path="/places/:osmKey" element={<PlaceDetail />} />
+          <Route path="/favorites" element={<Favorites />} />
+          <Route path="/trips" element={<Trips />} />
+          <Route path="/activity" element={<Activity />} />
+          <Route path="/trips/:id" element={<TripDetail />} />
+        </Routes>
+      </div>
 
       <Footer />
-    </>
+    </div>
   );
 }
 
