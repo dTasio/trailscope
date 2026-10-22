@@ -40,7 +40,13 @@ function Header() {
         </nav>
 
         {/* Botón menú mobile */}
-        <button type="button" className="rounded-lg px-3 py-2 font-medium text-text transition-colors hover:text-primary md:hidden" aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"} aria-expanded={menuOpen} onClick={() => setMenuOpen((prevMenuOpen) => !prevMenuOpen)}>
+        <button
+          type="button"
+          className="ml-auto rounded-lg px-3 py-2 font-medium text-text transition-colors hover:text-primary md:hidden"
+          aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((prevMenuOpen) => !prevMenuOpen)}
+        >
           {menuOpen ? "Cerrar" : "Menú"}
         </button>
       </div>
