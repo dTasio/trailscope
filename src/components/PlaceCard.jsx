@@ -1,9 +1,15 @@
-function PlaceCard({ name, type, location, altitude }) {
+function PlaceCard({ name, type, location, altitude, image }) {
   return (
     <article className="overflow-hidden rounded-2xl border border-border bg-surface transition hover:-translate-y-1 hover:shadow-lg">
-      <div className="flex aspect-4/3 items-center justify-center bg-surface-secondary">
-        <span className="text-sm font-medium text-muted">Imagen no disponible</span>
-      </div>
+      {image ? (
+        <div className="aspect-4/3 overflow-hidden">
+          <img src={image} alt={`Paisaje de ${name}`} className="h-full w-full object-cover" />
+        </div>
+      ) : (
+        <div className="flex aspect-4/3 items-center justify-center bg-surface-secondary">
+          <span className="text-sm font-medium text-muted">Imagen no disponible</span>
+        </div>
+      )}
 
       <div className="p-6">
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{type}</p>

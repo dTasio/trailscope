@@ -4,36 +4,41 @@ import FeaturedPlacesSection from "../components/home/FeaturedPlacesSection.jsx"
 import MapPreviewSection from "../components/home/MapPreviewSection.jsx";
 import TripPlanningSection from "../components/home/TripPlanningSection.jsx";
 import FinalCTASection from "../components/home/FinalCTASection.jsx";
-import heroImage from "../assets/images/hero-ordesa.jpg";
+import anayet from "../assets/images/anayet.jpg";
+import plan from "../assets/images/plan.jpg";
+import tresCascadas from "../assets/images/tresCascadas.jpg";
+import colaCaballo from "../assets/images/colaCaballo.jpg";
+import piedrafita from "../assets/images/piedrafita.jpg";
+import mirador from "../assets/images/mirador.jpg";
 
 //Constantes
 const featuredTrails = [
   {
     id: 1,
-    name: "Valle de Ordesa",
-    location: "Huesca · Aragón",
-    distance: "12,4 km",
-    duration: "3 h 30 min",
+    name: "Ibones de Anayet",
+    location: "Sallent de Gállego · Huesca",
+    distance: "11 km",
+    duration: "4 h",
     difficulty: "Media",
-    image: heroImage,
+    image: anayet,
   },
   {
     id: 2,
     name: "Ibón de Plan",
-    location: "Huesca · Aragón",
-    distance: "14 km",
-    duration: "4 h",
-    difficulty: "Media",
-    image: null,
+    location: "Saravillo · Huesca",
+    distance: "3 km",
+    duration: "55 min",
+    difficulty: "Fácil",
+    image: plan,
   },
   {
     id: 3,
-    name: "Ruta de las Cascadas",
-    location: "Pirineo Aragonés",
-    distance: "9,8 km",
-    duration: "2 h 45 min",
+    name: "Tres Cascadas de Cerler",
+    location: "Cerler · Huesca",
+    distance: "6,3 km",
+    duration: "2 h 10 min",
     difficulty: "Fácil",
-    image: heroImage,
+    image: tresCascadas,
   },
 ];
 
@@ -44,13 +49,15 @@ const featuredPlaces = [
     type: "Cascada",
     location: "Ordesa · Huesca",
     altitude: "1.760 m",
+    image: colaCaballo,
   },
   {
     id: 2,
-    name: "Ibón de Plan",
+    name: "Ibón de Piedrafita",
     type: "Lago",
-    location: "Valle de Chistau · Huesca",
-    altitude: "1.910 m",
+    location: "Piedrafita de Jaca · Huesca",
+    altitude: "1.611 m",
+    image: piedrafita,
   },
   {
     id: 3,
@@ -58,6 +65,7 @@ const featuredPlaces = [
     type: "Mirador",
     location: "Ordesa · Huesca",
     altitude: "1.950 m",
+    image: mirador,
   },
 ];
 

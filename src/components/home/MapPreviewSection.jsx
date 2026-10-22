@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import mapPreview from "../../assets/images/jaca.png";
 
 function MapPreviewSection() {
   return (
@@ -15,17 +16,19 @@ function MapPreviewSection() {
         </Link>
       </div>
 
-      <div className="relative min-h-100 overflow-hidden rounded-2xl border border-border bg-surface-secondary">
-        <div className="absolute inset-0 opacity-60">
-          <div className="absolute top-[25%] left-[20%] h-3 w-3 rounded-full bg-primary"></div>
-          <div className="absolute top-[38%] left-[58%] h-3 w-3 rounded-full bg-accent"></div>
-          <div className="absolute top-[68%] left-[72%] h-3 w-3 rounded-full bg-primary"></div>
+      <div className="relative min-h-105 overflow-hidden rounded-3xl border border-[#c7d7cc] bg-surface shadow-sm lg:min-h-115">
+        <img src={mapPreview} alt="Vista previa del mapa de TrailScope en la zona de Ordesa" className="absolute inset-0 h-full w-full object-cover" />
+
+        <div className="absolute top-5 right-5 rounded-full border border-white/60 bg-white/90 px-4 py-2 shadow-sm backdrop-blur-sm">
+          <p className="text-xs font-semibold text-[#315f49]">Hoz de Jaca · Huesca</p>
         </div>
 
-        <div className="absolute bottom-5 left-5 rounded-xl bg-white/90 px-5 py-4 shadow-lg backdrop-blur-sm">
+        <div className="absolute right-5 bottom-5 left-5 rounded-2xl border border-white/60 bg-white/92 px-5 py-4 shadow-lg backdrop-blur-md sm:right-auto sm:max-w-xs">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Explorar</p>
 
-          <p className="mt-1 font-semibold text-text">12 rutas y 8 lugares en esta zona</p>
+          <p className="mt-1 font-semibold text-text">Rutas y lugares naturales</p>
+
+          <p className="mt-1 text-sm text-muted">Descubre qué hay alrededor.</p>
         </div>
       </div>
     </section>
