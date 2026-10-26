@@ -76,12 +76,7 @@ function TripWeather({ trip }) {
 
   // Carga la previsión cuando cambian la zona o las fechas de la escapada
   useEffect(() => {
-    if (!hasCoordinates) {
-      setWeather(null);
-      setWeatherError("");
-      setIsLoading(false);
-      return;
-    }
+    if (!hasCoordinates) return;
 
     let cancelled = false;
 
@@ -146,7 +141,7 @@ function TripWeather({ trip }) {
         </div>
       )}
 
-      {weatherError && (
+      {hasCoordinates && weatherError && (
         <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700" role="alert">
           {weatherError}
         </div>

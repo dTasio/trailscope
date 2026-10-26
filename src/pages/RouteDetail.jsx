@@ -26,20 +26,6 @@ function DetailMetric({ value, label }) {
   );
 }
 
-function TrailInformationItem({ title, values, formatter }) {
-  if (values.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="min-w-0">
-      <p className="font-semibold text-text">{title}</p>
-
-      <p className="mt-2 leading-7 text-muted">{formatter(values).join(" · ")}</p>
-    </div>
-  );
-}
-
 // Muestra una característica de la ruta con sus valores formateados
 function TrailCharacteristic({ title, values, formatter }) {
   if (values.length === 0) {

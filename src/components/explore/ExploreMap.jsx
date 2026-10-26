@@ -13,6 +13,11 @@ const PLACE_MARKER_COLORS = {
   lake: "#06b6d4",
 };
 
+// Devuelve el color correspondiente a cada tipo de lugar
+function getPlaceMarkerColor(type) {
+  return PLACE_MARKER_COLORS[type] ?? "#2f5d50";
+}
+
 function ExploreMap({ trails, places, selectedTrailId, selectedPlaceKey, onSearchArea, onSelectTrail, onSelectPlace }) {
   // --------------------------------------------------
   // REFERENCIAS
@@ -363,11 +368,6 @@ function ExploreMap({ trails, places, selectedTrailId, selectedPlaceKey, onSearc
 
     onSearchArea(searchArea, zoom);
   };
-
-  // Devuelve el color correspondiente a cada tipo de lugar
-  function getPlaceMarkerColor(type) {
-    return PLACE_MARKER_COLORS[type] ?? "#2f5d50";
-  }
 
   // --------------------------------------------------
   // INTERFAZ REACT SOBRE EL MAPA
