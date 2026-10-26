@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-
+import { useState } from "react";
 import { addCompletedTrail } from "../../services/completedTrailsService.js";
 
+// Devuelve la fecha actual en formato YYYY-MM-DD
 function getTodayDate() {
   const today = new Date();
 
@@ -15,54 +15,43 @@ function getTodayDate() {
 }
 
 function CompleteTrailModal({ isOpen, onClose, trail, onCompleted }) {
+  // Fecha seleccionada y posibles errores
   const [completedDate, setCompletedDate] = useState(getTodayDate());
-
   const [error, setError] = useState("");
-
-  /*
-   * Cada vez que abrimos el modal,
-   * volvemos a poner hoy por defecto.
-   */
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    setCompletedDate(getTodayDate());
-
-    setError("");
-  }, [isOpen]);
 
   if (!isOpen || !trail) {
     return null;
   }
 
+  // Limpia el formulario antes de cerrar el modal
   const handleClose = () => {
+    setCompletedDate(getTodayDate());
     setError("");
-
     onClose();
   };
 
+  // Valida la fecha y registra la ruta solo si el guardado funciona
   const handleSubmit = (event) => {
     event.preventDefault();
 
     if (!completedDate) {
       setError("Selecciona la fecha en la que realizaste la ruta.");
-
       return;
     }
 
-    const result = addCompletedTrail(trail, completedDate);
+    try {
+      const result = addCompletedTrail(trail, completedDate);
 
-    if (result.alreadyCompleted) {
-      setError("Esta ruta ya está registrada como completada.");
+      if (result.alreadyCompleted) {
+        setError("Esta ruta ya está registrada como completada.");
+        return;
+      }
 
-      return;
+      onCompleted?.(result.completion);
+      handleClose();
+    } catch {
+      setError("No se ha podido registrar la ruta como completada");
     }
-
-    onCompleted?.(result.completion);
-
-    handleClose();
   };
 
   return (

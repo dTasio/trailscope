@@ -1,4 +1,4 @@
-import { runOverpassQuery } from "./overpassClient";
+import { runOverpassQuery } from "./overpassClient.js";
 
 // Determina qué categoría de TrailScope corresponde a un elemento de OSM
 function getPlaceType(tags = {}) {
@@ -44,6 +44,7 @@ function getPlaceCoordinates(element) {
   return null;
 }
 
+// Convierte un elemento de OpenStreetMap al formato de lugar utilizado por TrailScope
 function normalizePlace(element) {
   const tags = element.tags ?? {};
 
@@ -55,7 +56,6 @@ function normalizePlace(element) {
     id: element.id,
     osmType: element.type,
     osmKey: `${element.type}-${element.id}`,
-
     name: tags.name?.trim() || null,
     type,
     coordinates,
@@ -63,44 +63,32 @@ function normalizePlace(element) {
     // Información general
     description:
       tags.description?.trim() ?? null,
-
     elevation:
-      normalizeMeters(tags.ele),
-
+      normalizeMeters(tags.ele, true),
     website:
       tags.website?.trim() ?? null,
-
     wikipedia:
       tags.wikipedia?.trim() ?? null,
-
     wikidata:
       tags.wikidata?.trim() ?? null,
-
     wikimediaCommons:
       tags.wikimedia_commons?.trim() ?? null,
-
     image:
       tags.image?.trim() ?? null,
 
     // Información de visita
     access:
       tags.access?.trim() ?? null,
-
     wheelchair:
       tags.wheelchair?.trim() ?? null,
-
     fee:
       tags.fee?.trim() ?? null,
-
     charge:
       tags.charge?.trim() ?? null,
-
     openingHours:
       tags.opening_hours?.trim() ?? null,
-
     seasonal:
       tags.seasonal?.trim() ?? null,
-
     intermittent:
       tags.intermittent?.trim() ?? null,
 
@@ -109,7 +97,6 @@ function normalizePlace(element) {
       type === "waterfall"
         ? normalizeMeters(tags.height)
         : null,
-
     width:
       type === "waterfall"
         ? normalizeMeters(tags.width)
@@ -120,7 +107,6 @@ function normalizePlace(element) {
       type === "viewpoint"
         ? tags.direction?.trim() ?? null
         : null,
-
     viewpointType:
       type === "viewpoint"
         ? tags.viewpoint?.trim() ?? null
@@ -134,28 +120,27 @@ function normalizePlace(element) {
   };
 }
 
-function normalizeMeters(value) {
-  if (value == null) {
-    return null;
-  }
+// Convierte una medida de OpenStreetMap a metros y permite conservar valores negativos cuando corresponde
+function normalizeMeters(value, allowNegative = false) {
+  if (value == null) return null;
 
-  const normalizedValue = String(value)
-    .trim()
-    .toLowerCase()
-    .replace(",", ".");
+  const normalizedValue = String(value).trim().toLowerCase().replace(",", ".");
+  const match = normalizedValue.match(/^([+-]?\d+(?:\.\d+)?)\s*([a-z]+)?$/);
 
-  const match =
-    normalizedValue.match(/\d+(?:\.\d+)?/);
+  if (!match) return null;
 
-  if (!match) {
-    return null;
-  }
+  const valueNumber = Number(match[1]);
+  const unit = match[2] ?? "m";
 
-  const meters = Number(match[0]);
+  if (!Number.isFinite(valueNumber)) return null;
+  if (!allowNegative && valueNumber < 0) return null;
 
-  return Number.isFinite(meters)
-    ? meters
-    : null;
+  if (unit === "m") return valueNumber;
+  if (unit === "km") return valueNumber * 1000;
+  if (unit === "ft") return valueNumber * 0.3048;
+  if (unit === "mi") return valueNumber * 1609.344;
+
+  return null;
 }
 
 // Obtiene lugares naturales dentro de una zona concreta del mapa

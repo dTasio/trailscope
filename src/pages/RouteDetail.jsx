@@ -15,6 +15,7 @@ import CompleteTrailModal from "../components/activity/CompleteTrailModal.jsx";
 
 import { isTrailCompleted as checkIsTrailCompleted } from "../services/completedTrailsService.js";
 
+// Muestra una métrica principal de la ruta
 function DetailMetric({ value, label }) {
   return (
     <div className="rounded-xl border border-border bg-surface p-4">
@@ -39,6 +40,7 @@ function TrailInformationItem({ title, values, formatter }) {
   );
 }
 
+// Muestra una característica de la ruta con sus valores formateados
 function TrailCharacteristic({ title, values, formatter }) {
   if (values.length === 0) {
     return null;
@@ -64,19 +66,25 @@ function TrailCharacteristic({ title, values, formatter }) {
 function RouteDetail() {
   const { id } = useParams();
 
+  // Datos de la ruta y estado de carga
   const [trail, setTrail] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Estado de favoritos
   const [isTrailFavorite, setIsTrailFavorite] = useState(false);
+  const [favoriteError, setFavoriteError] = useState("");
 
+  // Estado del modal de escapadas y su mensaje de confirmación
   const [isTripModalOpen, setIsTripModalOpen] = useState(false);
   const [tripSuccessMessage, setTripSuccessMessage] = useState("");
 
+  // Estado del modal de completadas y su mensaje de confirmación
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
   const [isTrailCompleted, setIsTrailCompleted] = useState(false);
   const [completedSuccessMessage, setCompletedSuccessMessage] = useState("");
 
+  // Oculta el mensaje de escapada después de 3 segundos
   useEffect(() => {
     if (!tripSuccessMessage) {
       return;
@@ -91,6 +99,7 @@ function RouteDetail() {
     };
   }, [tripSuccessMessage]);
 
+  // Carga la ruta y comprueba si está guardada como favorita o completada
   useEffect(() => {
     const loadTrail = async () => {
       setIsLoading(true);
@@ -116,6 +125,7 @@ function RouteDetail() {
     loadTrail();
   }, [id]);
 
+  // Oculta el mensaje de ruta completada después de 3 segundos
   useEffect(() => {
     if (!completedSuccessMessage) {
       return;
@@ -160,6 +170,7 @@ function RouteDetail() {
     return null;
   }
 
+  // Prepara las características disponibles de la ruta
   const surfaces = trail.surface ?? [];
 
   const trailVisibility = trail.trailVisibility ?? [];
@@ -191,42 +202,42 @@ function RouteDetail() {
     },
   ].filter(Boolean);
 
+  // Ajusta las columnas según la cantidad de características disponibles
   const characteristicsGridClass = trailCharacteristics.length === 1 ? "max-w-2xl" : trailCharacteristics.length === 2 ? "grid gap-8 md:grid-cols-2" : "grid gap-8 md:grid-cols-2 lg:grid-cols-3";
 
+  // Añade o elimina la ruta de favoritos y actualiza la interfaz solo si el guardado funciona
   const handleFavorite = () => {
-    if (!trail) {
-      return;
-    }
+    if (!trail) return;
 
     const favoriteId = `trail-${trail.id}`;
 
-    if (isTrailFavorite) {
-      removeFavorite(favoriteId);
+    setFavoriteError("");
 
-      setIsTrailFavorite(false);
+    try {
+      if (isTrailFavorite) {
+        removeFavorite(favoriteId);
+        setIsTrailFavorite(false);
+        return;
+      }
 
-      return;
+      const favorite = {
+        favoriteId,
+        contentType: "trail",
+        id: trail.id,
+        name: trail.name,
+        distance: trail.distance,
+        ascent: trail.ascent,
+        descent: trail.descent,
+        duration: trail.duration,
+        from: trail.from,
+        to: trail.to,
+      };
+
+      addFavorite(favorite);
+      setIsTrailFavorite(true);
+    } catch {
+      setFavoriteError("No se ha podido actualizar el favorito");
     }
-
-    const favorite = {
-      favoriteId,
-      contentType: "trail",
-
-      id: trail.id,
-      name: trail.name,
-
-      distance: trail.distance,
-      ascent: trail.ascent,
-      descent: trail.descent,
-      duration: trail.duration,
-
-      from: trail.from,
-      to: trail.to,
-    };
-
-    addFavorite(favorite);
-
-    setIsTrailFavorite(true);
   };
 
   return (
@@ -283,6 +294,13 @@ function RouteDetail() {
               {isTrailCompleted ? "✓ Completada" : "✓ Marcar como completada"}
             </button>
           </div>
+
+          {favoriteError && (
+            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800" role="alert">
+              {favoriteError}
+            </div>
+          )}
+
           {completedSuccessMessage && (
             <div className="mt-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-800" role="status">
               ✓ {completedSuccessMessage}
@@ -394,6 +412,7 @@ function RouteDetail() {
           </section>
         )}
 
+        {/* Modal para añadir la ruta a una escapada */}
         <AddToTripModal
           isOpen={isTripModalOpen}
           onClose={() => setIsTripModalOpen(false)}
@@ -403,6 +422,7 @@ function RouteDetail() {
             setTripSuccessMessage(`Ruta añadida a "${trip.name}".`);
           }}
         />
+        {/* Modal para marcar la ruta como completada */}
         <CompleteTrailModal
           isOpen={isCompleteModalOpen}
           onClose={() => setIsCompleteModalOpen(false)}

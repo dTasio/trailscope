@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 
+// Formatea una fecha para mostrarla en español
 function formatDate(date) {
   if (!date) {
     return "";
@@ -13,10 +14,11 @@ function formatDate(date) {
 }
 
 function TripCard({ trip, onDelete }) {
+  // Cantidad de rutas y lugares incluidos en la escapada
   const trailsCount = trip.trails?.length ?? 0;
-
   const placesCount = trip.places?.length ?? 0;
 
+  // Confirma la eliminación antes de solicitarla
   const handleDelete = () => {
     const confirmed = window.confirm(`¿Quieres eliminar "${trip.name}"? Esta acción no se puede deshacer.`);
 

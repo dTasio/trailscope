@@ -3,6 +3,7 @@ import { Link } from "react-router";
 
 import { getCompletedTrails, removeCompletedTrail } from "../services/completedTrailsService.js";
 
+// Formatea la fecha de realización para mostrarla en español
 function formatCompletedDate(date) {
   if (!date) {
     return "";
@@ -16,33 +17,32 @@ function formatCompletedDate(date) {
 }
 
 function Activity() {
+  // Rutas completadas y posibles errores al eliminarlas
   const [completedTrails, setCompletedTrails] = useState(() => getCompletedTrails());
+  const [removeError, setRemoveError] = useState("");
 
-  /*
-   * Ordenamos de más reciente
-   * a más antigua.
-   */
+  // Ordena las rutas desde la realización más reciente
   const sortedCompletedTrails = [...completedTrails].sort((a, b) => b.completedDate.localeCompare(a.completedDate));
 
-  /*
-   * Estadísticas.
-   */
+  // Calcula las estadísticas a partir del historial
   const totalCompleted = completedTrails.length;
-
   const totalDistance = completedTrails.reduce((total, trail) => total + (Number(trail.distance) || 0), 0);
-
   const totalAscent = completedTrails.reduce((total, trail) => total + (Number(trail.ascent) || 0), 0);
 
+  // Elimina una ruta del historial solo si el guardado funciona
   const handleRemoveCompleted = (completionId) => {
     const confirmed = window.confirm("¿Quieres quitar esta ruta de tu historial de completadas?");
 
-    if (!confirmed) {
-      return;
+    if (!confirmed) return;
+
+    setRemoveError("");
+
+    try {
+      const updatedTrails = removeCompletedTrail(completionId);
+      setCompletedTrails(updatedTrails);
+    } catch {
+      setRemoveError("No se ha podido quitar la ruta del historial");
     }
-
-    const updatedTrails = removeCompletedTrail(completionId);
-
-    setCompletedTrails(updatedTrails);
   };
 
   const hasCompletedTrails = completedTrails.length > 0;
@@ -63,24 +63,16 @@ function Activity() {
         <div className="mt-10 grid gap-4 sm:grid-cols-3">
           <article className="rounded-2xl border border-border bg-surface p-6 text-center">
             <p className="text-3xl font-bold text-text">{totalCompleted}</p>
-
             <p className="mt-1 text-sm text-muted">Rutas completadas</p>
           </article>
 
           <article className="rounded-2xl border border-border bg-surface p-6 text-center">
-            <p className="text-3xl font-bold text-text">
-              {totalDistance.toLocaleString("es-ES", {
-                maximumFractionDigits: 1,
-              })}{" "}
-              km
-            </p>
-
+            <p className="text-3xl font-bold text-text">{totalDistance.toLocaleString("es-ES", { maximumFractionDigits: 1 })} km</p>
             <p className="mt-1 text-sm text-muted">Distancia recorrida</p>
           </article>
 
           <article className="rounded-2xl border border-border bg-surface p-6 text-center">
             <p className="text-3xl font-bold text-text">{totalAscent.toLocaleString("es-ES")} m</p>
-
             <p className="mt-1 text-sm text-muted">Desnivel acumulado</p>
           </article>
         </div>
@@ -112,6 +104,12 @@ function Activity() {
               <p className="mt-2 text-muted">Ordenadas desde la actividad más reciente.</p>
             </div>
 
+            {removeError && (
+              <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800" role="alert">
+                {removeError}
+              </div>
+            )}
+
             {/* Rutas completadas */}
             <div className="mt-7 space-y-3">
               {sortedCompletedTrails.map((trail) => (
@@ -124,14 +122,7 @@ function Activity() {
                       <h3 className="mt-2 text-xl font-bold tracking-tight text-text">{trail.name}</h3>
 
                       <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted">
-                        {trail.distance !== null && trail.distance !== undefined && (
-                          <span>
-                            {Number(trail.distance).toLocaleString("es-ES", {
-                              maximumFractionDigits: 1,
-                            })}{" "}
-                            km
-                          </span>
-                        )}
+                        {trail.distance !== null && trail.distance !== undefined && <span>{Number(trail.distance).toLocaleString("es-ES", { maximumFractionDigits: 1 })} km</span>}
 
                         {trail.ascent !== null && trail.ascent !== undefined && <span>+{trail.ascent} m</span>}
                       </div>

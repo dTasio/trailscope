@@ -1,7 +1,9 @@
 import { getStoredData, setStoredData} from "./storageService.js";
 
+// Clave utilizada para guardar todas las escapadas de TrailScope
 const TRIPS_KEY = "trailscope-trips";
 
+// Recupera las escapadas guardadas y devuelve una lista vacía si los datos no son válidos
 export function getTrips() {
   const trips = getStoredData(
     TRIPS_KEY,
@@ -13,6 +15,7 @@ export function getTrips() {
     : [];
 }
 
+// Busca una escapada por su identificador
 export function getTripById(tripId) {
   const trips = getTrips();
 
@@ -23,6 +26,7 @@ export function getTripById(tripId) {
   );
 }
 
+// Crea una nueva escapada con su estructura inicial y la guarda
 export function createTrip(tripData) {
   const trips = getTrips();
 
@@ -64,6 +68,7 @@ export function createTrip(tripData) {
   return newTrip;
 }
 
+// Actualiza una escapada existente y renueva su fecha de modificación
 export function updateTrip(updatedTrip) {
   const trips = getTrips();
 
@@ -86,6 +91,7 @@ export function updateTrip(updatedTrip) {
   return tripWithUpdatedDate;
 }
 
+// Elimina una escapada por su identificador
 export function deleteTrip(tripId) {
   const trips = getTrips();
 
@@ -101,6 +107,7 @@ export function deleteTrip(tripId) {
   return updatedTrips;
 }
 
+// Añade una copia de la ruta a la escapada evitando duplicados
 export function addTrailToTrip(tripId, trail) {
   const trips = getTrips();
 
@@ -132,6 +139,7 @@ export function addTrailToTrip(tripId, trail) {
     };
   }
 
+  // Guarda solo los datos de la ruta necesarios dentro de la escapada
   const trailSnapshot = {
     id: trail.id,
     name: trail.name,
@@ -161,7 +169,8 @@ export function addTrailToTrip(tripId, trail) {
   };
 }
 
-export function addPlaceToTrip(tripId,place) {
+// Añade una copia del lugar a la escapada evitando duplicados
+export function addPlaceToTrip(tripId, place) {
   const trips = getTrips();
 
   const trip = trips.find(
@@ -192,6 +201,7 @@ export function addPlaceToTrip(tripId,place) {
     };
   }
 
+  // Guarda solo los datos del lugar necesarios dentro de la escapada
   const placeSnapshot = {
     osmKey: place.osmKey,
     name: place.name,

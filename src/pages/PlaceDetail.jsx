@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-
 import { Link, useParams } from "react-router";
 
 import { getNaturalPlaceByKey } from "../services/placesService.js";
+import { addFavorite, removeFavorite, isFavorite as checkIsFavorite } from "../services/favoritesService.js";
 
 import PlaceMap from "../components/places/PlaceMap.jsx";
 import AddToTripModal from "../components/trips/AddToTripModal.jsx";
@@ -11,8 +11,7 @@ import placeDefaultImage from "../assets/images/place-default.jpg";
 
 import { formatAccess, formatDirection, formatPlaceName, formatPlaceType, formatWheelchair, formatYesNo } from "../utils/placeFormatters.js";
 
-import { addFavorite, removeFavorite, isFavorite as checkIsFavorite } from "../services/favoritesService.js";
-
+// Muestra una métrica principal del lugar
 function DetailMetric({ value, label }) {
   return (
     <div className="rounded-xl border border-border bg-surface p-4">
@@ -23,6 +22,7 @@ function DetailMetric({ value, label }) {
   );
 }
 
+// Muestra un dato adicional del lugar
 function PlaceInformationItem({ title, value }) {
   if (!value) {
     return null;
@@ -39,6 +39,7 @@ function PlaceInformationItem({ title, value }) {
   );
 }
 
+// Prepara y muestra las características disponibles del lugar
 function PlaceCharacteristics({ place }) {
   const characteristics = [
     place.seasonal && {
@@ -70,6 +71,7 @@ function PlaceCharacteristics({ place }) {
     return null;
   }
 
+  // Ajusta las columnas según la cantidad de características disponibles
   const gridClass = characteristics.length === 1 ? "max-w-2xl" : characteristics.length === 2 ? "grid gap-8 md:grid-cols-2" : "grid gap-8 md:grid-cols-2 lg:grid-cols-3";
 
   return (
@@ -85,6 +87,7 @@ function PlaceCharacteristics({ place }) {
   );
 }
 
+// Prepara y muestra la información útil para visitar el lugar
 function VisitInformation({ place }) {
   const visitInformation = [
     place.access && {
@@ -122,6 +125,7 @@ function VisitInformation({ place }) {
     return null;
   }
 
+  // Ajusta las columnas según la cantidad de datos disponibles
   const gridClass = visitInformation.length === 1 ? "max-w-2xl" : visitInformation.length === 2 ? "grid gap-8 md:grid-cols-2" : "grid gap-8 md:grid-cols-2 lg:grid-cols-3";
 
   return (
@@ -140,21 +144,20 @@ function VisitInformation({ place }) {
 function PlaceDetail() {
   const { osmKey } = useParams();
 
+  // Datos del lugar y estado de carga
   const [place, setPlace] = useState(null);
-
   const [isLoading, setIsLoading] = useState(true);
-
   const [error, setError] = useState(null);
 
+  // Estado de favoritos
   const [isPlaceFavorite, setIsPlaceFavorite] = useState(false);
+  const [favoriteError, setFavoriteError] = useState("");
 
+  // Estado del modal de escapadas y su mensaje de confirmación
   const [isTripModalOpen, setIsTripModalOpen] = useState(false);
-
   const [tripSuccessMessage, setTripSuccessMessage] = useState("");
 
-  /*
-   * Cargar lugar.
-   */
+  // Carga el lugar y comprueba si está guardado como favorito
   useEffect(() => {
     const loadPlace = async () => {
       setIsLoading(true);
@@ -179,10 +182,7 @@ function PlaceDetail() {
     void loadPlace();
   }, [osmKey]);
 
-  /*
-   * Ocultar confirmación
-   * de escapada.
-   */
+  // Oculta el mensaje de escapada después de 3 segundos
   useEffect(() => {
     if (!tripSuccessMessage) {
       return;
@@ -227,46 +227,41 @@ function PlaceDetail() {
     return null;
   }
 
+  // Prepara el nombre y el tipo que se mostrarán en la interfaz
   const displayName = formatPlaceName(place.name, place.type);
-
   const displayType = formatPlaceType(place.type);
 
+  // Añade o elimina el lugar de favoritos y actualiza la interfaz solo si el guardado funciona
   const handleFavorite = () => {
-    if (!place) {
-      return;
-    }
+    if (!place) return;
 
     const favoriteId = `place-${place.osmKey}`;
 
-    if (isPlaceFavorite) {
-      removeFavorite(favoriteId);
+    setFavoriteError("");
 
-      setIsPlaceFavorite(false);
+    try {
+      if (isPlaceFavorite) {
+        removeFavorite(favoriteId);
+        setIsPlaceFavorite(false);
+        return;
+      }
 
-      return;
+      const favorite = {
+        favoriteId,
+        contentType: "place",
+        osmKey: place.osmKey,
+        name: place.name,
+        type: place.type,
+        elevation: place.elevation,
+        coordinates: place.coordinates,
+        image: place.image,
+      };
+
+      addFavorite(favorite);
+      setIsPlaceFavorite(true);
+    } catch {
+      setFavoriteError("No se ha podido actualizar el favorito");
     }
-
-    const favorite = {
-      favoriteId,
-
-      contentType: "place",
-
-      osmKey: place.osmKey,
-
-      name: place.name,
-
-      type: place.type,
-
-      elevation: place.elevation,
-
-      coordinates: place.coordinates,
-
-      image: place.image,
-    };
-
-    addFavorite(favorite);
-
-    setIsPlaceFavorite(true);
   };
 
   return (
@@ -302,6 +297,12 @@ function PlaceDetail() {
               + Añadir a escapada
             </button>
           </div>
+
+          {favoriteError && (
+            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800" role="alert">
+              {favoriteError}
+            </div>
+          )}
 
           {tripSuccessMessage && (
             <div className="mt-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-800" role="status">
@@ -379,6 +380,7 @@ function PlaceDetail() {
           </section>
         )}
 
+        {/* Modal para añadir el lugar a una escapada */}
         <AddToTripModal
           isOpen={isTripModalOpen}
           onClose={() => setIsTripModalOpen(false)}
