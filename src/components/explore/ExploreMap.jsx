@@ -114,9 +114,8 @@ function ExploreMap({ trails, places, selectedTrailId, selectedPlaceKey, onSearc
           "line-opacity": 1,
         },
       });
+      setIsMapLoaded(true);
     });
-
-    setIsMapLoaded(true);
 
     // Cleanup: destruye el mapa cuando se desmonta el componente
     return () => {

@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-
 import { LngLatBounds, Map, Marker, NavigationControl } from "maplibre-gl";
 
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -10,6 +9,7 @@ const PLACE_MARKER_COLORS = {
   lake: "#06b6d4",
 };
 
+// Añade coordenadas anidadas a los límites del mapa de forma recursiva
 function extendBoundsFromCoordinates(bounds, coordinates) {
   if (!Array.isArray(coordinates)) {
     return;
@@ -29,21 +29,17 @@ function extendBoundsFromCoordinates(bounds, coordinates) {
 }
 
 function TripPlannerMap({ destination, trails = [], places = [], selectedResult = null, onSelectResult }) {
+  // Referencias del mapa y sus marcadores
   const mapContainer = useRef(null);
-
   const mapRef = useRef(null);
 
   const destinationMarkerRef = useRef(null);
-
   const placeMarkersRef = useRef([]);
-
   const selectedPlaceMarkerRef = useRef(null);
 
   const [isMapReady, setIsMapReady] = useState(false);
 
-  /*
-   * Crear mapa una sola vez.
-   */
+  // Crea las capas del mapa y libera la instancia al salir
   useEffect(() => {
     if (!mapContainer.current) {
       return;
@@ -62,9 +58,7 @@ function TripPlannerMap({ destination, trails = [], places = [], selectedResult 
     map.addControl(new NavigationControl(), "top-right");
 
     map.on("load", () => {
-      /*
-       * Todas las rutas visibles.
-       */
+      //Todas las rutas visibles
       map.addSource("trip-trails", {
         type: "geojson",
 
@@ -97,9 +91,7 @@ function TripPlannerMap({ destination, trails = [], places = [], selectedResult 
         },
       });
 
-      /*
-       * Ruta seleccionada.
-       */
+      //Ruta seleccionada
       map.addSource("selected-trip-trail", {
         type: "geojson",
 
@@ -152,9 +144,7 @@ function TripPlannerMap({ destination, trails = [], places = [], selectedResult 
     };
   }, []);
 
-  /*
-   * Destino de la escapada.
-   */
+  // Actualiza el centro y el marcador cuando cambia el destino
   useEffect(() => {
     const map = mapRef.current;
 
@@ -186,9 +176,7 @@ function TripPlannerMap({ destination, trails = [], places = [], selectedResult 
       .addTo(map);
   }, [destination, isMapReady]);
 
-  /*
-   * Rutas visibles.
-   */
+  // Actualiza los recorridos cuando cambian los resultados
   useEffect(() => {
     const map = mapRef.current;
 
@@ -222,9 +210,7 @@ function TripPlannerMap({ destination, trails = [], places = [], selectedResult 
     });
   }, [trails, isMapReady]);
 
-  /*
-   * Lugares visibles.
-   */
+  // Sustituye los marcadores y conecta sus clics con la selección
   useEffect(() => {
     const map = mapRef.current;
 
@@ -272,9 +258,7 @@ function TripPlannerMap({ destination, trails = [], places = [], selectedResult 
     });
   }, [places, isMapReady, onSelectResult]);
 
-  /*
-   * Clic sobre una ruta.
-   */
+  // Conecta los clics sobre las rutas y retira los eventos anteriores
   useEffect(() => {
     const map = mapRef.current;
 
@@ -326,9 +310,7 @@ function TripPlannerMap({ destination, trails = [], places = [], selectedResult 
     };
   }, [trails, isMapReady, onSelectResult]);
 
-  /*
-   * Resultado seleccionado.
-   */
+  // Limpia el resaltado anterior y encuadra el resultado seleccionado
   useEffect(() => {
     const map = mapRef.current;
 
@@ -338,9 +320,7 @@ function TripPlannerMap({ destination, trails = [], places = [], selectedResult 
 
     const selectedTrailSource = map.getSource("selected-trip-trail");
 
-    /*
-     * Limpiar selección anterior.
-     */
+    //Limpia selección anterior
     if (selectedTrailSource) {
       selectedTrailSource.setData({
         type: "FeatureCollection",
@@ -357,9 +337,7 @@ function TripPlannerMap({ destination, trails = [], places = [], selectedResult 
       return;
     }
 
-    /*
-     * Lugar seleccionado.
-     */
+    //Lugar seleccionado
     if (selectedResult.resultType === "place") {
       const longitude = selectedResult.coordinates?.longitude;
 
@@ -387,9 +365,7 @@ function TripPlannerMap({ destination, trails = [], places = [], selectedResult 
       return;
     }
 
-    /*
-     * Ruta seleccionada.
-     */
+    //Ruta seleccionada
     if (selectedResult.resultType === "trail" && selectedResult.geometry && selectedTrailSource) {
       selectedTrailSource.setData({
         type: "Feature",

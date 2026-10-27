@@ -1,3 +1,4 @@
+// Elige un nombre entre los separados por punto y coma y prioriza el que contiene mirador
 export function formatPlaceName(name, type) {
   if (!name) {
     return "Lugar natural";
@@ -13,9 +14,7 @@ export function formatPlaceName(name, type) {
   }
 
   if (type === "viewpoint") {
-    const viewpointName = names.find((item) =>
-      item.toLowerCase().includes("mirador")
-    );
+    const viewpointName = names.find((item) => item.toLowerCase().includes("mirador"));
 
     if (viewpointName) {
       return viewpointName;
@@ -46,19 +45,8 @@ export function formatDirection(direction) {
     return direction;
   }
 
-  const directions = [
-    "Norte",
-    "Noreste",
-    "Este",
-    "Sureste",
-    "Sur",
-    "Suroeste",
-    "Oeste",
-    "Noroeste",
-  ];
-
-  const index =
-    Math.round(numericDirection / 45) % 8;
+  const directions = ["Norte", "Noreste", "Este", "Sureste", "Sur", "Suroeste", "Oeste", "Noroeste"];
+  const index = Math.round(numericDirection / 45) % 8;
 
   return `${directions[index]} · ${numericDirection}°`;
 }
@@ -68,8 +56,7 @@ export function formatYesNo(value) {
     return null;
   }
 
-  const normalizedValue =
-    value.toLowerCase();
+  const normalizedValue = value.toLowerCase();
 
   if (normalizedValue === "yes") {
     return "Sí";

@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react";
-
 import { Map, Marker, NavigationControl } from "maplibre-gl";
 
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -12,9 +11,10 @@ const PLACE_MARKER_COLORS = {
 };
 
 function PlaceMap({ coordinates, type }) {
-  // Elemento HTML donde MapLibre crea el mapa
+  // Referencia al contenedor donde MapLibre crea el mapa
   const mapContainer = useRef(null);
 
+  // Recrea el mapa cuando cambian el lugar o su tipo y elimina la instancia anterior
   useEffect(() => {
     if (!mapContainer.current || !coordinates) {
       return;
@@ -33,7 +33,7 @@ function PlaceMap({ coordinates, type }) {
     // Añade los controles de zoom y orientación
     map.addControl(new NavigationControl(), "top-right");
 
-    // Obtiene el mismo color que utilizamos para este tipo de lugar en Explore.
+    // Mantiene el mismo color de marcador utilizado en Explore
     const markerColor = PLACE_MARKER_COLORS[type] ?? "#2f5d50";
 
     // Añade un marker sobre la ubicación del lugar
@@ -44,7 +44,7 @@ function PlaceMap({ coordinates, type }) {
       .setLngLat([longitude, latitude])
       .addTo(map);
 
-    // Elimina la instancia del mapa cuando el componente deja de existir.
+    // Elimina la instancia del mapa cuando el componente deja de existir
     return () => {
       map.remove();
     };

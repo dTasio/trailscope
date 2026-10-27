@@ -1,8 +1,10 @@
 import { useEffect, useRef } from "react";
 
 function NearbyResultsCarousel({ title, items, trails, places, selectedItem, onSelect, onAddTrail, onAddPlace }) {
+  // Guarda referencias a las tarjetas para poder desplazarse hasta la seleccionada
   const itemRefs = useRef(new Map());
 
+  // Desplaza el carrusel hasta la tarjeta seleccionada desde el mapa
   useEffect(() => {
     if (!selectedItem) {
       return;

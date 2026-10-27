@@ -41,7 +41,6 @@ const featuredTrails = [
     image: tresCascadas,
   },
 ];
-
 const featuredPlaces = [
   {
     id: 1,

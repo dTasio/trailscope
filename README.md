@@ -1,74 +1,47 @@
 # TrailScope
 
-\<p align="center">
-&#x20; \<img src="src/assets/images/branding/trailscope-logo.png" alt="TrailScope" width="320" />
-\</p>
+<p align="center">
+  <img src="src/assets/images/branding/trailscope-logo.png" alt="TrailScope" width="320" />
+</p>
 
-TrailScope es una aplicación web para descubrir rutas de senderismo y lugares naturales, consultar información relevante sobre ellos y organizar futuras escapadas.
+TrailScope es una aplicación web para **descubrir rutas de senderismo y lugares naturales, guardar favoritos y planificar escapadas**.
 
-El proyecto nace como una pieza de portfolio centrada especialmente en **frontend, experiencia de usuario, consumo de APIs, mapas interactivos y desarrollo con React**.
-
-La aplicación permite explorar contenido geográfico real, guardar favoritos, crear escapadas, consultar meteorología y llevar un registro de rutas completadas.
+Es un proyecto de portfolio centrado especialmente en **React, frontend visual, consumo de APIs, mapas interactivos y experiencia de usuario**.
 
 ---
 
 ## Funcionalidades
 
-### Explorar rutas y lugares
+### Explorar
 
-TrailScope permite buscar contenido dentro de una zona determinada del mapa.
+Permite buscar dentro de una zona del mapa:
 
-Actualmente se pueden consultar:
+- rutas de senderismo
+- cascadas
+- miradores
+- lagos
 
-- rutas de senderismo;
-- cascadas;
-- miradores;
-- lagos.
-
-Los resultados se muestran tanto visualmente sobre un mapa interactivo como mediante tarjetas de contenido.
-
-Cada ruta o lugar dispone además de una página de detalle con la información disponible obtenida desde los servicios externos utilizados por la aplicación.
+Los resultados se muestran mediante tarjetas y sobre un mapa interactivo. Cada ruta o lugar dispone además de su propia página de detalle.
 
 ### Favoritos
 
-Las rutas y lugares se pueden guardar como favoritos para consultarlos posteriormente.
-
-Los favoritos se almacenan localmente en el navegador mediante `localStorage`.
+Las rutas y lugares pueden guardarse para consultarlos posteriormente.
 
 ### Escapadas
 
-El usuario puede crear escapadas indicando:
-
-- nombre;
-- fecha de inicio;
-- fecha de finalización;
-- zona o localidad;
-- notas.
-
-Dentro de cada escapada puede buscar rutas y lugares cercanos y añadirlos a su planificación.
+El usuario puede crear escapadas con destino, fechas y notas, buscar contenido cercano y añadir rutas o lugares a su planificación.
 
 ### Meteorología
 
-Cuando una escapada tiene una ubicación definida, TrailScope consulta la previsión meteorológica disponible para esa zona y fechas.
-
-Se muestran datos como:
-
-- temperatura máxima y mínima;
-- probabilidad de precipitación;
-- velocidad del viento;
-- estado meteorológico previsto.
+Las escapadas pueden mostrar la previsión meteorológica disponible para el destino y las fechas seleccionadas.
 
 ### Rutas completadas
 
-Las rutas realizadas pueden marcarse como completadas indicando la fecha en la que se realizaron.
-
-Esto permite mantener un pequeño historial de actividad dentro de la aplicación.
+Las rutas realizadas pueden marcarse como completadas y mantenerse como historial de actividad.
 
 ---
 
-## Tecnologías utilizadas
-
-El proyecto ha sido desarrollado principalmente con:
+## Tecnologías
 
 - **React**
 - **Vite**
@@ -78,280 +51,112 @@ El proyecto ha sido desarrollado principalmente con:
 - **MapLibre GL JS**
 - **localStorage**
 
-No utiliza actualmente backend, base de datos ni sistema de autenticación.
-
-La persistencia de favoritos, escapadas y rutas completadas se realiza directamente en el navegador.
+TrailScope es actualmente una aplicación frontend sin backend, base de datos ni autenticación.
 
 ---
 
 ## APIs y servicios externos
 
-TrailScope utiliza diferentes servicios externos para obtener información real.
+TrailScope trabaja con información real obtenida mediante servicios externos:
 
-### OpenStreetMap y Overpass API
-
-Los datos de rutas y lugares naturales proceden de **OpenStreetMap** y se consultan mediante **Overpass API**.
-
-TrailScope transforma posteriormente estos datos para adaptarlos a la estructura utilizada por la interfaz.
-
-Los datos de OpenStreetMap son creados y mantenidos por su comunidad de colaboradores.
+- **OpenStreetMap + Overpass API** — rutas y lugares naturales
+- **Open-Meteo** — meteorología y búsqueda de localidades
+- **MapLibre GL JS + OpenFreeMap** — representación cartográfica
 
 **© OpenStreetMap contributors**
 
-### Open-Meteo
-
-La información meteorológica se obtiene mediante **Open-Meteo**.
-
-La disponibilidad de la previsión depende de las fechas seleccionadas y del periodo meteorológico disponible en cada momento.
-
-### MapLibre y OpenFreeMap
-
-La representación cartográfica de TrailScope utiliza **MapLibre GL JS** junto con mapas proporcionados mediante **OpenFreeMap**.
+Al depender de APIs externas, determinadas búsquedas pueden tardar, fallar temporalmente o no disponer de información suficiente para una zona concreta.
 
 ---
 
-## Dependencia de servicios externos
+## Persistencia
 
-> **Importante:** TrailScope depende de APIs y servicios externos para obtener rutas, lugares, información geográfica y meteorología.
+Favoritos, escapadas y rutas completadas se almacenan mediante `localStorage`.
 
-Esto significa que en determinados momentos una consulta puede tardar más de lo habitual o incluso fallar temporalmente debido a factores ajenos a la propia aplicación, como:
-
-- indisponibilidad temporal de una API;
-- límites o saturación del servicio;
-- problemas de conexión;
-- ausencia de información para una zona determinada;
-- datos incompletos en OpenStreetMap.
-
-Por este motivo, ocasionalmente TrailScope puede mostrar mensajes indicando que no se han podido recuperar determinados datos.
-
-Este comportamiento no implica necesariamente un fallo interno de la aplicación, sino que puede deberse a la disponibilidad del servicio externo consultado.
-
----
-
-## Arquitectura del proyecto
-
-La aplicación está organizada separando responsabilidades entre componentes, páginas, servicios y utilidades.
-
-```text
-src/
-├── assets/
-│   └── images/
-├── components/
-│   ├── explore/
-│   ├── places/
-│   ├── routes/
-│   └── trips/
-├── pages/
-├── services/
-├── utils/
-├── App.jsx
-└── main.jsx
-```
-
-### `components`
-
-Contiene componentes reutilizables de la interfaz.
-
-### `pages`
-
-Contiene las principales vistas asociadas a las rutas de la aplicación.
-
-### `services`
-
-Centraliza la comunicación con APIs externas y la persistencia mediante `localStorage`.
-
-### `utils`
-
-Agrupa funciones auxiliares para transformar y presentar los datos.
-
----
-
-## Principales rutas
-
-```text
-/                 Inicio
-/explore          Exploración
-/routes/:id       Detalle de una ruta
-/places/:osmKey   Detalle de un lugar
-/favorites        Favoritos
-/trips            Escapadas
-/trips/:id        Planificación de una escapada
-/activity         Rutas completadas
-```
-
----
-
-## Persistencia de datos
-
-TrailScope no requiere registro ni cuenta de usuario.
-
-Los siguientes datos se almacenan mediante `localStorage`:
-
-- favoritos;
-- escapadas;
-- rutas completadas;
-- información asociada a la planificación.
-
-Esto permite mantener la información entre sesiones en el mismo navegador.
-
-Al tratarse de almacenamiento local:
-
-- los datos no se sincronizan entre dispositivos;
-- borrar los datos del navegador puede eliminar la información guardada;
-- actualmente no existe una cuenta desde la que recuperar los datos.
+Esto permite conservar la información entre sesiones en el mismo navegador, aunque actualmente no existe sincronización entre dispositivos ni cuentas de usuario.
 
 ---
 
 ## Diseño y experiencia de usuario
 
-Uno de los objetivos principales del proyecto ha sido trabajar especialmente la parte visual y de frontend.
+El apartado visual ha sido uno de los objetivos principales del proyecto.
 
-Durante el desarrollo se ha prestado atención a:
+Se ha trabajado especialmente en:
 
-- jerarquía visual;
-- espaciado;
-- tipografía;
-- paleta de colores consistente;
-- responsive design;
-- estados de interacción;
-- mapas y contenido visual;
-- navegación clara;
-- tarjetas y componentes reutilizables;
-- adaptación de la interfaz a escritorio y dispositivos móviles.
+- diseño responsive
+- jerarquía visual y espaciado
+- consistencia entre componentes
+- interacción con mapas
+- tarjetas y estados visuales
+- navegación en escritorio y móvil
 
-La identidad visual de TrailScope utiliza principalmente tonos verdes y naturales relacionados con senderismo, montaña y naturaleza.
+La identidad de TrailScope utiliza tonos relacionados con naturaleza, montaña y senderismo.
 
 ---
 
-## Imágenes y recursos visuales
+## Recursos visuales
 
-TrailScope utiliza distintos tipos de recursos visuales.
+Las fotografías de rutas, paisajes y lugares naturales utilizadas en TrailScope proceden de **Wikimedia Commons**.
 
-Las fotografías de lugares reales utilizadas en la aplicación han sido obtenidas de Wikimedia Commons, respetando su carácter de contenido público y las condiciones asociadas a sus respectivos recursos.
-
-También se han utilizado imágenes generadas mediante Inteligencia Artificial para determinados elementos visuales genéricos o de apoyo, especialmente cuando no representan un lugar real concreto.
-
-El logotipo e identidad visual de TrailScope también han sido desarrollados específicamente para este proyecto con apoyo de herramientas de Inteligencia Artificial.
-
-El objetivo de las imágenes generadas mediante IA es complementar la interfaz, no presentar contenido ficticio como si fuera información geográfica real.
+El logotipo y la identidad visual han sido creados específicamente para el proyecto.
 
 ---
 
-## Uso de Inteligencia Artificial durante el desarrollo
+## Uso de Inteligencia Artificial
 
-La Inteligencia Artificial se ha utilizado como herramienta de apoyo durante diferentes fases del proyecto para:
+La IA se ha utilizado como herramienta de apoyo para resolver dudas, revisar código, mejorar documentación y apoyar determinadas decisiones de desarrollo.
 
-- resolver dudas técnicas;
-- revisar fragmentos de código;
-- analizar posibles errores;
-- mejorar documentación;
-- revisar decisiones de implementación;
-- generar determinados recursos visuales.
-
-Durante la fase final del proyecto se utilizó **OpenAI Codex para realizar una revisión global del código**.
-
-Esta revisión sirvió para localizar posibles errores, problemas de consistencia, situaciones límite y oportunidades de mejora antes del cierre del proyecto.
-
-Las correcciones seleccionadas fueron posteriormente revisadas e implementadas de forma consciente dentro del proyecto.
+Durante la fase final también se utilizó **OpenAI Codex para realizar una revisión global del proyecto** antes de su publicación.
 
 ---
 
-## Decisiones técnicas
+## Decisiones principales
 
-### React sin backend
-
-Para esta versión se decidió mantener TrailScope como aplicación frontend.
-
-El objetivo principal del proyecto era profundizar en React, interfaces, APIs y experiencia de usuario antes de añadir una infraestructura backend innecesaria para su alcance actual.
-
-### localStorage
-
-Para favoritos, escapadas y actividad se eligió `localStorage` como solución sencilla de persistencia.
-
-Permite desarrollar toda la experiencia principal sin necesidad de cuentas de usuario ni base de datos.
-
-### Datos reales mediante APIs
-
-En lugar de utilizar una base de datos estática creada específicamente para el proyecto, TrailScope consulta fuentes externas para trabajar con información geográfica y meteorológica real.
-
-Esto aporta mayor realismo al proyecto, aunque introduce también dependencia de servicios de terceros.
-
-### MapLibre
-
-MapLibre permite representar las rutas, lugares y zonas de búsqueda de forma interactiva y mantener la solución basada en tecnologías abiertas.
+- **Frontend sin backend:** el objetivo de esta versión era profundizar en React, APIs, mapas y experiencia de usuario
+- **localStorage:** permite incorporar persistencia sin añadir una infraestructura innecesaria para el alcance actual
+- **Datos reales:** rutas, lugares y meteorología proceden de servicios externos en lugar de datos simulados
+- **MapLibre:** permite representar rutas y lugares de forma interactiva mediante tecnologías abiertas
 
 ---
 
-## Qué he trabajado con este proyecto
+## Qué he trabajado
 
-TrailScope me ha permitido reforzar especialmente:
+TrailScope me ha permitido reforzar principalmente:
 
-- desarrollo de interfaces con React;
-- componentes y reutilización;
-- estado y efectos;
-- React Router;
-- consumo de APIs;
-- trabajo con datos asíncronos;
-- tratamiento de errores;
-- transformación de datos externos;
-- mapas interactivos;
-- GeoJSON;
-- persistencia mediante `localStorage`;
-- responsive design;
-- Tailwind CSS;
-- organización de un proyecto frontend;
-- revisión y depuración de código;
-- Git y GitHub;
-- toma de decisiones técnicas.
-
-También ha sido un proyecto especialmente útil para mejorar mi autonomía al pasar de proyectos más pequeños a una aplicación con varias funcionalidades conectadas entre sí.
+- React y componentes
+- estado y efectos
+- React Router
+- consumo y transformación de APIs
+- asincronía y tratamiento de errores
+- MapLibre y GeoJSON
+- `localStorage`
+- Tailwind CSS y responsive design
+- organización de proyectos frontend
+- Git y GitHub
+- revisión y depuración de código
 
 ---
 
-## Limitaciones actuales
-
-TrailScope es un proyecto de portfolio y no pretende sustituir aplicaciones profesionales de senderismo o navegación.
+## Limitaciones
 
 Actualmente:
 
-- no dispone de cuentas de usuario;
-- no existe sincronización entre dispositivos;
-- los datos guardados dependen del navegador;
-- la disponibilidad de rutas y lugares depende de los datos existentes en OpenStreetMap;
-- las consultas pueden fallar temporalmente si un servicio externo no está disponible;
-- la meteorología depende del periodo de previsión disponible;
-- la aplicación no debe utilizarse como herramienta de seguridad o navegación profesional en montaña.
+- no dispone de cuentas de usuario
+- no sincroniza datos entre dispositivos
+- depende de la información disponible en OpenStreetMap y otros servicios externos
+- la meteorología está limitada al periodo de previsión disponible
+- no debe utilizarse como herramienta profesional de navegación o seguridad en montaña
 
 ---
 
-## Posibles mejoras futuras
+## Posibles mejoras
 
-Algunas posibles evoluciones del proyecto serían:
-
-- incorporar autenticación;
-- utilizar una base de datos;
-- sincronizar escapadas y favoritos entre dispositivos;
-- compartir escapadas;
-- mejorar los filtros de búsqueda;
-- añadir más categorías de lugares;
-- mejorar accesibilidad;
-- ampliar información de las rutas;
-- añadir tests automatizados;
-- mejorar el tratamiento de respuestas asíncronas;
-- evolucionar la planificación de escapadas.
-
-Estas mejoras no forman parte del alcance actual porque el objetivo ha sido cerrar primero una versión frontend completa, funcional y presentable.
+En futuras versiones podrían incorporarse autenticación, base de datos, sincronización, más filtros y categorías, mejoras de accesibilidad y tests automatizados.
 
 ---
 
-## Estado del proyecto
+## Estado
 
 **Versión actual:** funcional y en fase final de publicación.
 
-La aplicación será desplegada públicamente como parte de mi portfolio de desarrollo web.
-
----
-
-## Autor
-
-Proyecto desarrollado como parte de mi portfolio personal de desarrollo web y aprendizaje profesional.
+Proyecto desarrollado como parte de mi portfolio personal de desarrollo web.

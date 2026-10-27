@@ -17,7 +17,7 @@ import TripDetail from "./pages/TripDetail.jsx";
 function App() {
   const { pathname } = useLocation();
 
-  // Lleva la página al inicio cada vez que cambia la ruta.
+  // Lleva la página al inicio cada vez que cambia la ruta
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
