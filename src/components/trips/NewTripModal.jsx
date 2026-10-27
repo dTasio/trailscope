@@ -1,17 +1,20 @@
 import { useState } from "react";
 
 function NewTripModal({ isOpen, onClose, onCreateTrip }) {
+  // Datos del formulario
   const [name, setName] = useState("");
   const [destination, setDestination] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  // Error de validación o guardado
   const [validationError, setValidationError] = useState("");
 
   if (!isOpen) {
     return null;
   }
 
+  // Limpia todos los campos y errores del formulario
   const resetForm = () => {
     setName("");
     setDestination("");
@@ -20,35 +23,39 @@ function NewTripModal({ isOpen, onClose, onCreateTrip }) {
     setValidationError("");
   };
 
+  // Limpia el formulario antes de cerrar el modal
   const handleClose = () => {
     resetForm();
     onClose();
   };
 
+  // Valida los datos y crea la escapada solo si el guardado funciona
   const handleSubmit = (event) => {
     event.preventDefault();
 
     if (!name.trim() || !destination.trim() || !startDate || !endDate) {
-      setValidationError("Completa todos los campos antes de crear la escapada.");
-
+      setValidationError("Completa todos los campos antes de crear la escapada");
       return;
     }
 
     if (endDate < startDate) {
-      setValidationError("La fecha de finalización no puede ser anterior a la fecha de inicio.");
-
+      setValidationError("La fecha de finalización no puede ser anterior a la fecha de inicio");
       return;
     }
 
-    onCreateTrip({
-      name: name.trim(),
-      destination: destination.trim(),
-      startDate,
-      endDate,
-    });
+    try {
+      onCreateTrip({
+        name: name.trim(),
+        destination: destination.trim(),
+        startDate,
+        endDate,
+      });
 
-    resetForm();
-    onClose();
+      resetForm();
+      onClose();
+    } catch {
+      setValidationError("No se ha podido crear la escapada");
+    }
   };
 
   return (

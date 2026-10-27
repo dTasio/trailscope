@@ -6,28 +6,40 @@ import TripCard from "../components/trips/TripCard.jsx";
 import { createTrip, getTrips, deleteTrip } from "../services/tripsService.js";
 
 function Trips() {
+  // Escapadas guardadas y mensajes de la página
   const [trips, setTrips] = useState(() => getTrips());
+  const [successMessage, setSuccessMessage] = useState("");
+  const [tripError, setTripError] = useState("");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const [successMessage, setSuccessMessage] = useState("");
-
+  // Añade la nueva escapada a la interfaz después de guardarla
   const handleCreateTrip = (tripData) => {
+    setTripError("");
+    setSuccessMessage("");
+
     const newTrip = createTrip(tripData);
 
     setTrips((currentTrips) => [...currentTrips, newTrip]);
-
     setSuccessMessage("Escapada creada correctamente.");
   };
 
+  // Elimina una escapada solo si el guardado funciona
   const handleDeleteTrip = (tripId) => {
-    const updatedTrips = deleteTrip(tripId);
+    setTripError("");
+    setSuccessMessage("");
 
-    setTrips(updatedTrips);
+    try {
+      const updatedTrips = deleteTrip(tripId);
 
-    setSuccessMessage("Escapada eliminada correctamente.");
+      setTrips(updatedTrips);
+      setSuccessMessage("Escapada eliminada correctamente.");
+    } catch {
+      setTripError("No se ha podido eliminar la escapada");
+    }
   };
 
+  // Oculta el mensaje de éxito después de unos segundos
   useEffect(() => {
     if (!successMessage) {
       return;
@@ -64,6 +76,12 @@ function Trips() {
         {successMessage && (
           <div className="mt-8 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-semibold text-green-800" role="status">
             ✓ {successMessage}
+          </div>
+        )}
+        {/* Mensaje de error */}
+        {tripError && (
+          <div className="mt-8 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-800" role="alert">
+            {tripError}
           </div>
         )}
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Map, Marker, NavigationControl, setWorkerUrl, LngLatBounds } from "maplibre-gl";
 import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -13,13 +13,20 @@ const PLACE_MARKER_COLORS = {
   lake: "#06b6d4",
 };
 
+// Devuelve el color correspondiente a cada tipo de lugar
+function getPlaceMarkerColor(type) {
+  return PLACE_MARKER_COLORS[type] ?? "#2f5d50";
+}
+
 function ExploreMap({ trails, places, selectedTrailId, selectedPlaceKey, onSearchArea, onSelectTrail, onSelectPlace }) {
   // --------------------------------------------------
   // REFERENCIAS
   // --------------------------------------------------
-  const mapContainer = useRef(null); //Contenedor donde se dibuja el mapa
-  const map = useRef(null); //Instancia de MapLibre entre renders
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
 
+  // Referencias del mapa y sus markers
+  const mapContainer = useRef(null);
+  const map = useRef(null);
   const trailMarkers = useRef([]);
   const placeMarkers = useRef([]);
 
@@ -107,12 +114,14 @@ function ExploreMap({ trails, places, selectedTrailId, selectedPlaceKey, onSearc
           "line-opacity": 1,
         },
       });
+      setIsMapLoaded(true);
     });
 
     // Cleanup: destruye el mapa cuando se desmonta el componente
     return () => {
       map.current?.remove();
       map.current = null;
+      setIsMapLoaded(false);
     };
   }, []);
 
@@ -143,9 +152,9 @@ function ExploreMap({ trails, places, selectedTrailId, selectedPlaceKey, onSearc
   // GEOMETRÍA DE LAS RUTAS
   // --------------------------------------------------
 
-  // Convierte las rutas de React a GeoJSON y actualiza la source que utiliza MapLibre para dibujarlas
+  // Actualiza las geometrías cuando cambian las rutas o termina de cargar el mapa
   useEffect(() => {
-    if (!map.current) return;
+    if (!map.current || !isMapLoaded) return;
 
     const source = map.current.getSource("trail-routes");
 
@@ -170,22 +179,22 @@ function ExploreMap({ trails, places, selectedTrailId, selectedPlaceKey, onSearc
 
     // Sustituye los datos anteriores por las nuevas rutas
     source.setData(geojson);
-  }, [trails]);
+  }, [trails, isMapLoaded]);
 
   // --------------------------------------------------
   // RUTA SELECCIONADA
   // --------------------------------------------------
 
-  // Actualiza el filtro de MapLibre para destacar solamente la ruta que está seleccionada
+  // Destaca la ruta seleccionada cuando el mapa está preparado
   useEffect(() => {
-    if (!map.current) return;
+    if (!map.current || !isMapLoaded) return;
 
     const selectedLayer = map.current.getLayer("trail-route-selected");
 
     if (!selectedLayer) return;
 
     map.current.setFilter("trail-route-selected", ["==", ["get", "id"], selectedTrailId ?? -1]);
-  }, [selectedTrailId]);
+  }, [selectedTrailId, isMapLoaded]);
 
   // --------------------------------------------------
   // INTERACCIÓN CON LAS RUTAS DEL MAPA
@@ -193,7 +202,7 @@ function ExploreMap({ trails, places, selectedTrailId, selectedPlaceKey, onSearc
 
   // Permite seleccionar una ruta haciendo clic directamente sobre su recorrido y cambia el cursor al pasar por encima
   useEffect(() => {
-    if (!map.current) return;
+    if (!map.current || !isMapLoaded) return;
 
     const handleMouseEnter = () => {
       map.current.getCanvas().style.cursor = "pointer";
@@ -228,7 +237,7 @@ function ExploreMap({ trails, places, selectedTrailId, selectedPlaceKey, onSearc
       map.current?.off("mouseenter", "trail-routes-hitbox", handleMouseEnter);
       map.current?.off("mouseleave", "trail-routes-hitbox", handleMouseLeave);
     };
-  }, [onSelectTrail]);
+  }, [onSelectTrail, isMapLoaded]);
 
   // --------------------------------------------------
   // ENCUADRE AUTOMÁTICO DE LA RUTA
@@ -358,11 +367,6 @@ function ExploreMap({ trails, places, selectedTrailId, selectedPlaceKey, onSearc
 
     onSearchArea(searchArea, zoom);
   };
-
-  // Devuelve el color correspondiente a cada tipo de lugar
-  function getPlaceMarkerColor(type) {
-    return PLACE_MARKER_COLORS[type] ?? "#2f5d50";
-  }
 
   // --------------------------------------------------
   // INTERFAZ REACT SOBRE EL MAPA

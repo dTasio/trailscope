@@ -1,27 +1,26 @@
 import { useEffect, useRef } from "react";
-
 import { LngLatBounds, Map, NavigationControl } from "maplibre-gl";
 
 import "maplibre-gl/dist/maplibre-gl.css";
 
 function RouteMap({ geometry }) {
-  // Referencia al elemento HTML donde MapLibre creará el mapa.
+  /// Referencia al contenedor donde MapLibre crea el mapa
   const mapContainer = useRef(null);
 
+  // Recrea el mapa cuando cambia el recorrido y elimina la instancia anterior
   useEffect(() => {
     if (!mapContainer.current || !geometry) {
       return;
     }
 
-    // Convierte la geometría de la ruta en una Feature GeoJSON
-    // que MapLibre puede utilizar como fuente de datos.
+    // Adapta la geometría al formato que necesita la fuente del mapa
     const routeGeoJSON = {
       type: "Feature",
       properties: {},
       geometry,
     };
 
-    // Crea el mapa.
+    // Crea el mapa
     const map = new Map({
       container: mapContainer.current,
       style: "https://tiles.openfreemap.org/styles/liberty",
@@ -29,17 +28,17 @@ function RouteMap({ geometry }) {
       zoom: 5,
     });
 
-    // Controles de zoom y orientación.
+    // Controles de zoom y orientación
     map.addControl(new NavigationControl(), "top-right");
 
     map.on("load", () => {
-      // Añade la geometría de la ruta como fuente GeoJSON.
+      // Añade la geometría de la ruta como fuente GeoJSON
       map.addSource("route", {
         type: "geojson",
         data: routeGeoJSON,
       });
 
-      // Dibuja la ruta sobre el mapa.
+      // Dibuja la ruta sobre el mapa
       map.addLayer({
         id: "route-line",
         type: "line",
@@ -55,15 +54,14 @@ function RouteMap({ geometry }) {
         },
       });
 
-      // Calcula los límites completos de la ruta.
+      // Calcula los límites completos de la ruta
       const bounds = new LngLatBounds();
 
       geometry.coordinates.flat().forEach(([longitude, latitude]) => {
         bounds.extend([longitude, latitude]);
       });
 
-      // Ajusta automáticamente el mapa para mostrar
-      // todo el recorrido de la ruta.
+      //Ajusta automáticamente el mapa para mostrar todo el recorrido de la ruta
       if (!bounds.isEmpty()) {
         map.fitBounds(bounds, {
           padding: 60,
@@ -73,8 +71,7 @@ function RouteMap({ geometry }) {
       }
     });
 
-    // Elimina la instancia del mapa cuando
-    // el componente deja de existir.
+    // Elimina la instancia del mapa cuando el componente deja de existir
     return () => {
       map.remove();
     };

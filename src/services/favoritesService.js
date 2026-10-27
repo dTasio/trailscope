@@ -1,8 +1,11 @@
-import { getStoredData, setStoredData} from "./storageService.js";
+import {getStoredData, setStoredData} from "./storageService.js";
 
+// Clave utilizada para guardar todos los favoritos de TrailScope
 const FAVORITES_KEY =
   "trailscope-favorites";
 
+// Recupera los favoritos guardados
+// Si el contenido almacenado no es una lista válida, devuelve una lista vacía
 export function getFavorites() {
   const favorites = getStoredData(
     FAVORITES_KEY,
@@ -14,6 +17,7 @@ export function getFavorites() {
     : [];
 }
 
+// Comprueba si una ruta o lugar ya está guardado como favorito
 export function isFavorite(favoriteId) {
   const favorites = getFavorites();
 
@@ -23,6 +27,7 @@ export function isFavorite(favoriteId) {
   );
 }
 
+// Añade un favorito solo si todavía no existe
 export function addFavorite(favorite) {
   const favorites = getFavorites();
 
@@ -49,6 +54,7 @@ export function addFavorite(favorite) {
   return updatedFavorites;
 }
 
+// Elimina el favorito que coincide con el identificador recibido
 export function removeFavorite(favoriteId) {
   const favorites = getFavorites();
 

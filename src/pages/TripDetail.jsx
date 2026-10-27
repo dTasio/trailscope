@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { Link, useParams } from "react-router";
 
 import TripPlannerMap from "../components/trips/TripPlannerMap.jsx";
@@ -11,9 +10,9 @@ import { getTripById, updateTrip } from "../services/tripsService.js";
 import { searchLocations } from "../services/geocodingService.js";
 
 import { getHikingTrails } from "../services/trailsService.js";
-
 import { getNaturalPlaces } from "../services/placesService.js";
 
+// Formatea una fecha para mostrarla en español
 function formatDate(date) {
   if (!date) {
     return "";
@@ -26,6 +25,7 @@ function formatDate(date) {
   }).format(new Date(`${date}T00:00:00`));
 }
 
+// Calcula los límites aproximados de búsqueda alrededor de unas coordenadas
 function getBoundsAroundLocation(latitude, longitude, radiusKm = 12) {
   const latitudeDelta = radiusKm / 111;
 
@@ -44,59 +44,40 @@ function getBoundsAroundLocation(latitude, longitude, radiusKm = 12) {
 
 function TripDetail() {
   const { id } = useParams();
-
   const [trip, setTrip] = useState(() => getTripById(id));
-
   const [notes, setNotes] = useState(trip?.notes ?? "");
 
-  /*
-   * Mensajes
-   */
+  // Mensajes del planificador
   const [plannerSuccessMessage, setPlannerSuccessMessage] = useState("");
+  const [plannerError, setPlannerError] = useState("");
 
+  // Mensajes de las notas
   const [notesSuccessMessage, setNotesSuccessMessage] = useState("");
+  const [notesError, setNotesError] = useState("");
 
-  /*
-   * Búsqueda geográfica
-   */
+  // Búsqueda geográfica
   const [searchTerm, setSearchTerm] = useState("");
-
   const [locationResults, setLocationResults] = useState([]);
-
   const [isSearchingLocation, setIsSearchingLocation] = useState(false);
-
   const [locationSearchError, setLocationSearchError] = useState("");
 
-  /*
-   * Contenido cercano
-   */
+  // Rutas y lugares encontrados cerca de la zona
   const [contentType, setContentType] = useState("all");
-
   const [nearbyTrails, setNearbyTrails] = useState([]);
-
   const [nearbyPlaces, setNearbyPlaces] = useState([]);
-
   const [isLoadingNearbyContent, setIsLoadingNearbyContent] = useState(false);
-
   const [nearbyContentError, setNearbyContentError] = useState("");
-
   const [hasSearchedNearbyContent, setHasSearchedNearbyContent] = useState(false);
-
   const [selectedNearbyResult, setSelectedNearbyResult] = useState(null);
 
-  /*
-   * Cambiar filtro.
-   */
+  // Cambia el tipo de contenido visible en el mapa y carrusel
   const handleContentTypeChange = (nextContentType) => {
     setContentType(nextContentType);
 
     setSelectedNearbyResult(null);
   };
 
-  /*
-   * Ocultar mensaje
-   * del planificador.
-   */
+  // Oculta el mensaje del planificador después de 3 segundos
   useEffect(() => {
     if (!plannerSuccessMessage) {
       return;
@@ -111,10 +92,7 @@ function TripDetail() {
     };
   }, [plannerSuccessMessage]);
 
-  /*
-   * Ocultar mensaje
-   * de notas.
-   */
+  // Oculta el mensaje de notas después de 3 segundos
   useEffect(() => {
     if (!notesSuccessMessage) {
       return;
@@ -129,9 +107,7 @@ function TripDetail() {
     };
   }, [notesSuccessMessage]);
 
-  /*
-   * Escapada inexistente.
-   */
+  // Escapada inexistente
   if (!trip) {
     return (
       <main>
@@ -148,16 +124,12 @@ function TripDetail() {
     );
   }
 
+  // Rutas y lugares guardados actualmente en la escapada
   const trails = trip.trails ?? [];
-
   const places = trip.places ?? [];
 
-  /*
-   * Una única fuente de verdad
-   * para filtros + mapa + carrusel.
-   */
+  // Filtra los resultados usados por el mapa y el carrusel
   const visibleNearbyTrails = contentType === "places" ? [] : nearbyTrails;
-
   const visibleNearbyPlaces = contentType === "trails" ? [] : nearbyPlaces;
 
   const visibleNearbyResults = [
@@ -165,7 +137,6 @@ function TripDetail() {
       ...trail,
       resultType: "trail",
     })),
-
     ...visibleNearbyPlaces.map((place) => ({
       ...place,
       resultType: "place",
@@ -174,23 +145,18 @@ function TripDetail() {
 
   const hasDestinationCoordinates = typeof trip.destination?.latitude === "number" && typeof trip.destination?.longitude === "number";
 
-  /*
-   * Cargar contenido cercano.
-   */
+  // Busca rutas y lugares alrededor de la zona seleccionada
   const loadNearbyContent = async (location) => {
     const bounds = getBoundsAroundLocation(location.latitude, location.longitude);
 
     setIsLoadingNearbyContent(true);
-
     setNearbyContentError("");
 
     setNearbyTrails([]);
     setNearbyPlaces([]);
 
     setHasSearchedNearbyContent(false);
-
     setContentType("all");
-
     setSelectedNearbyResult(null);
 
     try {
@@ -207,7 +173,6 @@ function TripDetail() {
       }
 
       const trailsFailed = trailsResult.status === "rejected";
-
       const placesFailed = placesResult.status === "rejected";
 
       if (trailsFailed && placesFailed) {
@@ -219,14 +184,11 @@ function TripDetail() {
       }
     } finally {
       setIsLoadingNearbyContent(false);
-
       setHasSearchedNearbyContent(true);
     }
   };
 
-  /*
-   * Buscar localidad.
-   */
+  // Busca localidades a partir del texto introducido
   const handleLocationSearch = async (event) => {
     event.preventDefault();
 
@@ -259,160 +221,152 @@ function TripDetail() {
     }
   };
 
-  /*
-   * Seleccionar localidad.
-   */
+  // Guarda la zona seleccionada y carga su contenido cercano
   const handleSelectLocation = (location) => {
-    const updatedTrip = updateTrip({
-      ...trip,
+    setPlannerError("");
+    setPlannerSuccessMessage("");
 
-      destination: {
-        ...trip.destination,
+    try {
+      const updatedTrip = updateTrip({
+        ...trip,
+        destination: {
+          ...trip.destination,
+          latitude: location.latitude,
+          longitude: location.longitude,
+          locationLabel: location.label,
+        },
+      });
 
-        latitude: location.latitude,
+      setTrip(updatedTrip);
+      setSearchTerm("");
+      setLocationResults([]);
+      setLocationSearchError("");
+      setSelectedNearbyResult(null);
+      setPlannerSuccessMessage(`Zona localizada: ${location.label}`);
 
-        longitude: location.longitude,
-
-        locationLabel: location.label,
-      },
-    });
-
-    setTrip(updatedTrip);
-
-    setSearchTerm("");
-
-    setLocationResults([]);
-
-    setLocationSearchError("");
-
-    setSelectedNearbyResult(null);
-
-    setPlannerSuccessMessage(`Zona localizada: ${location.label}`);
-
-    void loadNearbyContent(location);
+      void loadNearbyContent(location);
+    } catch {
+      setPlannerError("No se ha podido guardar la zona seleccionada");
+    }
   };
 
-  /*
-   * Añadir ruta.
-   */
+  // Añade una copia de la ruta a la escapada si todavía no existe
   const handleAddTrail = (trail) => {
     const alreadyAdded = trails.some((storedTrail) => String(storedTrail.id) === String(trail.id));
 
-    if (alreadyAdded) {
-      return;
-    }
+    if (alreadyAdded) return;
 
     const trailSnapshot = {
       id: trail.id,
-
       name: trail.name,
-
       distance: trail.distance,
-
       ascent: trail.ascent,
-
       descent: trail.descent,
-
       duration: trail.duration,
-
       from: trail.from,
-
       to: trail.to,
-
       center: trail.center,
-
       geometry: trail.geometry,
     };
 
-    const updatedTrip = updateTrip({
-      ...trip,
+    setPlannerError("");
+    setPlannerSuccessMessage("");
 
-      trails: [...trails, trailSnapshot],
-    });
+    try {
+      const updatedTrip = updateTrip({
+        ...trip,
+        trails: [...trails, trailSnapshot],
+      });
 
-    setTrip(updatedTrip);
-
-    setPlannerSuccessMessage("Ruta añadida a la escapada.");
+      setTrip(updatedTrip);
+      setPlannerSuccessMessage("Ruta añadida a la escapada.");
+    } catch {
+      setPlannerError("No se ha podido añadir la ruta a la escapada");
+    }
   };
 
-  /*
-   * Añadir lugar.
-   */
+  // Añade una copia del lugar a la escapada si todavía no existe
   const handleAddPlace = (place) => {
     const alreadyAdded = places.some((storedPlace) => storedPlace.osmKey === place.osmKey);
 
-    if (alreadyAdded) {
-      return;
-    }
+    if (alreadyAdded) return;
 
     const placeSnapshot = {
       osmKey: place.osmKey,
-
       name: place.name,
-
       type: place.type,
-
       elevation: place.elevation,
-
       coordinates: place.coordinates,
-
       image: place.image,
     };
 
-    const updatedTrip = updateTrip({
-      ...trip,
+    setPlannerError("");
+    setPlannerSuccessMessage("");
+    try {
+      const updatedTrip = updateTrip({
+        ...trip,
+        places: [...places, placeSnapshot],
+      });
 
-      places: [...places, placeSnapshot],
-    });
-
-    setTrip(updatedTrip);
-
-    setPlannerSuccessMessage("Lugar añadido a la escapada.");
+      setTrip(updatedTrip);
+      setPlannerSuccessMessage("Lugar añadido a la escapada.");
+    } catch {
+      setPlannerError("No se ha podido añadir el lugar a la escapada");
+    }
   };
 
-  /*
-   * Quitar ruta.
-   */
+  // Elimina una ruta guardada de la escapada
   const handleRemoveTrail = (trailId) => {
-    const updatedTrip = updateTrip({
-      ...trip,
+    setPlannerError("");
+    setPlannerSuccessMessage("");
 
-      trails: trails.filter((trail) => String(trail.id) !== String(trailId)),
-    });
+    try {
+      const updatedTrip = updateTrip({
+        ...trip,
+        trails: trails.filter((trail) => String(trail.id) !== String(trailId)),
+      });
 
-    setTrip(updatedTrip);
-
-    setPlannerSuccessMessage("Ruta eliminada de la escapada.");
+      setTrip(updatedTrip);
+      setPlannerSuccessMessage("Ruta eliminada de la escapada.");
+    } catch {
+      setPlannerError("No se ha podido eliminar la ruta de la escapada");
+    }
   };
 
-  /*
-   * Quitar lugar.
-   */
+  // Elimina un lugar guardado de la escapada
   const handleRemovePlace = (osmKey) => {
-    const updatedTrip = updateTrip({
-      ...trip,
+    setPlannerError("");
+    setPlannerSuccessMessage("");
 
-      places: places.filter((place) => place.osmKey !== osmKey),
-    });
+    try {
+      const updatedTrip = updateTrip({
+        ...trip,
+        places: places.filter((place) => place.osmKey !== osmKey),
+      });
 
-    setTrip(updatedTrip);
-
-    setPlannerSuccessMessage("Lugar eliminado de la escapada.");
+      setTrip(updatedTrip);
+      setPlannerSuccessMessage("Lugar eliminado de la escapada.");
+    } catch {
+      setPlannerError("No se ha podido eliminar el lugar de la escapada");
+    }
   };
 
-  /*
-   * Guardar notas.
-   */
+  // Guarda las notas y mantiene el texto si el guardado falla
   const handleSaveNotes = () => {
-    const updatedTrip = updateTrip({
-      ...trip,
+    setNotesError("");
+    setNotesSuccessMessage("");
 
-      notes: notes.trim(),
-    });
+    try {
+      const updatedTrip = updateTrip({
+        ...trip,
+        notes: notes.trim(),
+      });
 
-    setTrip(updatedTrip);
-
-    setNotesSuccessMessage("Notas guardadas correctamente.");
+      setTrip(updatedTrip);
+      setNotesSuccessMessage("Notas guardadas correctamente.");
+    } catch {
+      setNotesError("No se han podido guardar las notas");
+    }
   };
 
   return (
@@ -472,6 +426,11 @@ function TripDetail() {
             {plannerSuccessMessage && (
               <div className="mt-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-semibold text-green-800" role="status">
                 ✓ {plannerSuccessMessage}
+              </div>
+            )}
+            {plannerError && (
+              <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-800" role="alert">
+                {plannerError}
               </div>
             )}
 
@@ -661,7 +620,9 @@ function TripDetail() {
                       <article key={trail.id} className="flex items-center justify-between gap-4 rounded-xl bg-[#eef2ee] px-4 py-3">
                         {/* Información */}
                         <div className="min-w-0">
-                          <p className="font-semibold leading-6 text-text">{trail.name}</p>
+                          <Link to={`/routes/${trail.id}`} className="font-semibold leading-6 text-text transition-colors hover:text-primary">
+                            {trail.name}
+                          </Link>
 
                           <div className="mt-0.5 flex flex-wrap gap-x-3 text-sm text-muted">
                             {trail.distance !== null && trail.distance !== undefined && <span>{trail.distance} km</span>}
@@ -696,7 +657,9 @@ function TripDetail() {
                       <article key={place.osmKey} className="flex items-center justify-between gap-4 rounded-xl bg-[#eef2ee] px-4 py-3">
                         {/* Información */}
                         <div className="min-w-0">
-                          <p className="font-semibold leading-6 text-text">{place.name}</p>
+                          <Link to={`/places/${place.osmKey}`} className="font-semibold leading-6 text-text transition-colors hover:text-primary">
+                            {place.name}
+                          </Link>
 
                           {place.elevation !== null && place.elevation !== undefined && <p className="mt-0.5 text-sm text-muted">Altitud {place.elevation} m</p>}
                         </div>
@@ -750,6 +713,12 @@ function TripDetail() {
             {notesSuccessMessage && (
               <div className="mt-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-800" role="status">
                 ✓ {notesSuccessMessage}
+              </div>
+            )}
+
+            {notesError && (
+              <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800" role="alert">
+                {notesError}
               </div>
             )}
           </section>

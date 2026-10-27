@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-
 import { getTripWeather } from "../../services/weatherService.js";
 
+// Formatea una fecha de previsión para mostrarla en español
 function formatWeatherDate(date) {
   return new Intl.DateTimeFormat("es-ES", {
     weekday: "short",
@@ -10,6 +10,7 @@ function formatWeatherDate(date) {
   }).format(new Date(`${date}T00:00:00`));
 }
 
+// Convierte el código meteorológico en una descripción legible
 function formatWeatherCode(code) {
   if (code === 0) {
     return "Despejado";
@@ -63,37 +64,32 @@ function formatWeatherCode(code) {
 }
 
 function TripWeather({ trip }) {
+  // Previsión meteorológica y estado de la consulta
   const [weather, setWeather] = useState(null);
-
+  const [weatherError, setWeatherError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const [weatherError, setWeatherError] = useState("");
-
   const latitude = trip.destination?.latitude;
-
   const longitude = trip.destination?.longitude;
 
   const hasCoordinates = typeof latitude === "number" && typeof longitude === "number";
 
+  // Carga la previsión cuando cambian la zona o las fechas de la escapada
   useEffect(() => {
-    if (!hasCoordinates) {
-      setWeather(null);
-      return;
-    }
+    if (!hasCoordinates) return;
 
     let cancelled = false;
 
     const loadWeather = async () => {
       setIsLoading(true);
+      setWeather(null);
       setWeatherError("");
 
       try {
         const result = await getTripWeather({
           latitude,
           longitude,
-
           startDate: trip.startDate,
-
           endDate: trip.endDate,
         });
 
@@ -102,6 +98,7 @@ function TripWeather({ trip }) {
         }
       } catch (error) {
         if (!cancelled) {
+          setWeather(null);
           setWeatherError(error.message);
         }
       } finally {
@@ -144,7 +141,7 @@ function TripWeather({ trip }) {
         </div>
       )}
 
-      {weatherError && (
+      {hasCoordinates && weatherError && (
         <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700" role="alert">
           {weatherError}
         </div>
@@ -158,7 +155,7 @@ function TripWeather({ trip }) {
         </div>
       )}
 
-      {days.length > 0 && (
+      {hasCoordinates && !isLoading && !weatherError && days.length > 0 && (
         <>
           {hasPartialForecast && <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm font-medium text-amber-800">Solo se muestra la previsión disponible actualmente para las fechas de esta escapada.</div>}
 

@@ -5,8 +5,8 @@ import { addPlaceToTrip, addTrailToTrip, getTrips } from "../../services/tripsSe
 import { formatPlaceName } from "../../utils/placeFormatters.js";
 
 function AddToTripModal({ isOpen, onClose, item, type, onAdded }) {
+  // Escapada seleccionada y posibles errores
   const [selectedTripId, setSelectedTripId] = useState("");
-
   const [error, setError] = useState("");
 
   const trips = getTrips();
@@ -15,49 +15,25 @@ function AddToTripModal({ isOpen, onClose, item, type, onAdded }) {
     return null;
   }
 
-  /*
-   * Seguimos necesitando saber
-   * si es ruta o lugar para la
-   * lógica, pero ya no para
-   * decidir los colores.
-   */
+  // Indica si el elemento recibido es una ruta o un lugar
   const isTrail = type === "trail";
 
-  /*
-   * Tema visual único TrailScope.
-   */
+  // Colores compartidos por todo el modal
   const theme = {
     eyebrow: "text-[#3f6b53]",
-
     itemBox: "border-[#c7d7cc] bg-[#f2f7f3]",
-
     itemText: "text-[#2f5d50]",
-
     selectedTrip: "border-[#8eae99] bg-[#f2f7f3]",
-
     addedTrip: "border-[#8eae99] bg-[#edf4ef]",
-
     badge: "bg-[#315f49] text-white",
-
     button: "bg-[#315f49] text-white hover:bg-[#244b39]",
-
     radio: "accent-[#315f49]",
   };
 
-  /*
-   * Nombre mostrado.
-   *
-   * En lugares utilizamos el
-   * formatter que ya tenemos para
-   * limpiar nombres procedentes
-   * de OpenStreetMap.
-   */
+  // Prepara el nombre que se mostrará según el tipo de elemento
   const displayName = isTrail ? item.name : formatPlaceName(item.name, item.type);
 
-  /*
-   * Comprobar si la ruta o lugar
-   * ya forma parte de una escapada.
-   */
+  // Comprueba si la ruta o lugar ya forma parte de una escapada
   const isItemAlreadyInTrip = (trip) => {
     if (isTrail) {
       return (trip.trails ?? []).some((trail) => String(trail.id) === String(item.id));
@@ -66,9 +42,7 @@ function AddToTripModal({ isOpen, onClose, item, type, onAdded }) {
     return (trip.places ?? []).some((place) => place.osmKey === item.osmKey);
   };
 
-  /*
-   * Cerrar modal y limpiar estado.
-   */
+  // Limpia la selección y los errores antes de cerrar el modal
   const handleClose = () => {
     setSelectedTripId("");
     setError("");
@@ -76,9 +50,7 @@ function AddToTripModal({ isOpen, onClose, item, type, onAdded }) {
     onClose();
   };
 
-  /*
-   * Añadir elemento.
-   */
+  // Valida la selección y añade el elemento solo si el guardado funciona
   const handleSubmit = (event) => {
     event.preventDefault();
 
@@ -90,10 +62,7 @@ function AddToTripModal({ isOpen, onClose, item, type, onAdded }) {
 
     const selectedTrip = trips.find((trip) => trip.id === selectedTripId);
 
-    /*
-     * Protección extra ante
-     * duplicados.
-     */
+    // Evita intentar guardar un elemento que ya está en la escapada
     if (selectedTrip && isItemAlreadyInTrip(selectedTrip)) {
       setError(isTrail ? "Esta ruta ya forma parte de la escapada." : "Este lugar ya forma parte de la escapada.");
 
@@ -113,7 +82,7 @@ function AddToTripModal({ isOpen, onClose, item, type, onAdded }) {
 
       handleClose();
     } catch (error) {
-      setError(error.message);
+      setError(error.message === "La escapada no existe." ? error.message : "No se ha podido añadir a la escapada");
     }
   };
 

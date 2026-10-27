@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router";
+import trailScopeLogo from "../assets/images/branding/trailscope-logo.png";
 
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -16,8 +17,8 @@ function Header() {
     <header className="border-b border-border bg-surface">
       <div className="mx-auto flex max-w-7xl items-center px-6 py-5">
         {/* Logo */}
-        <Link to="/" className="shrink-0 rounded-lg px-3 py-2 text-3xl font-bold tracking-tight text-primary" onClick={closeMenu}>
-          TrailScope
+        <Link to="/" className="shrink-0" onClick={closeMenu}>
+          <img src={trailScopeLogo} alt="TrailScope" className="h-18 w-auto object-contain" />
         </Link>
 
         {/* Navegación desktop */}
@@ -53,7 +54,7 @@ function Header() {
 
       {/* Navegación mobile */}
       {menuOpen && (
-        <nav className="border-t border-border bg-background px-6 py-5 md:hidden" aria-label="Navegación móvil">
+        <nav className="border-t border-border bg-surface px-6 py-5 md:hidden" aria-label="Navegación móvil">
           <div className="mx-auto flex max-w-7xl flex-col gap-5">
             <NavLink to="/explore" className={getMobileNavLinkClass} onClick={closeMenu}>
               Explorar

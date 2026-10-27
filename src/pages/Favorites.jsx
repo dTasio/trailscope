@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { Link } from "react-router";
 
 import { getFavorites, removeFavorite } from "../services/favoritesService.js";
@@ -12,26 +11,22 @@ import placeDefaultImage from "../assets/images/place-default.jpg";
 import { formatPlaceName, formatPlaceType } from "../utils/placeFormatters.js";
 
 function Favorites() {
+  // Favoritos guardados y posibles errores al eliminarlos
   const [favorites, setFavorites] = useState(() => getFavorites());
+  const [favoriteError, setFavoriteError] = useState("");
 
+  // Contenido seleccionado para añadir a una escapada
   const [tripModalContent, setTripModalContent] = useState(null);
-
   const [tripSuccessMessage, setTripSuccessMessage] = useState("");
 
+  // Separa los favoritos entre rutas y lugares
   const trailFavorites = favorites.filter((favorite) => favorite.contentType === "trail");
-
   const placeFavorites = favorites.filter((favorite) => favorite.contentType === "place");
-
   const hasFavorites = favorites.length > 0;
 
-  /*
-   * Ocultar confirmación
-   * automáticamente.
-   */
+  // Oculta el mensaje de escapada después de 3 segundos
   useEffect(() => {
-    if (!tripSuccessMessage) {
-      return;
-    }
+    if (!tripSuccessMessage) return;
 
     const timeoutId = setTimeout(() => {
       setTripSuccessMessage("");
@@ -42,20 +37,20 @@ function Favorites() {
     };
   }, [tripSuccessMessage]);
 
-  /*
-   * Eliminar favorito.
-   */
+  // Elimina un favorito solo si el guardado funciona
   const handleRemoveFavorite = (favoriteId) => {
-    const updatedFavorites = removeFavorite(favoriteId);
+    setFavoriteError("");
 
-    setFavorites(updatedFavorites);
+    try {
+      const updatedFavorites = removeFavorite(favoriteId);
+
+      setFavorites(updatedFavorites);
+    } catch {
+      setFavoriteError("No se ha podido quitar el favorito");
+    }
   };
 
-  /*
-   * Abrir el selector de
-   * escapadas para una ruta
-   * o un lugar.
-   */
+  // Abre el selector de escapadas con la ruta o lugar elegido
   const handleOpenTripModal = (item, type) => {
     setTripModalContent({
       item,
@@ -63,17 +58,12 @@ function Favorites() {
     });
   };
 
-  /*
-   * Cerrar modal.
-   */
+  // Cierra el selector de escapadas
   const handleCloseTripModal = () => {
     setTripModalContent(null);
   };
 
-  /*
-   * Confirmación al añadir
-   * contenido a una escapada.
-   */
+  // Muestra la confirmación después de añadir contenido a una escapada
   const handleAddedToTrip = (trip) => {
     const contentLabel = tripModalContent?.type === "trail" ? "Ruta" : "Lugar";
 
@@ -96,6 +86,12 @@ function Favorites() {
         {tripSuccessMessage && (
           <div className="mt-6 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-semibold text-green-800" role="status">
             ✓ {tripSuccessMessage}
+          </div>
+        )}
+
+        {favoriteError && (
+          <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-800" role="alert">
+            {favoriteError}
           </div>
         )}
 
@@ -147,7 +143,6 @@ function Favorites() {
                       {(trail.from || trail.to) && (
                         <p className="mt-2 text-sm leading-6 text-[#5d7065]">
                           {trail.from ?? "Inicio"}
-
                           {trail.to && ` → ${trail.to}`}
                         </p>
                       )}
@@ -171,7 +166,7 @@ function Favorites() {
                       {/* Acciones */}
                       <div className="mt-auto pt-6">
                         <div className="flex items-center justify-between gap-4">
-                          <Link to={`/routes/${trail.id}`} className="-mx-2 inline-flex min-h-11 items-center underline px-2 font-semibold text-[#2f654c] transition-colors hover:text-[#193c2d]">
+                          <Link to={`/routes/${trail.id}`} className="-mx-2 inline-flex min-h-11 items-center px-2 font-semibold text-[#2f654c] underline transition-colors hover:text-[#193c2d]">
                             Explorar ruta →
                           </Link>
 
@@ -215,7 +210,6 @@ function Favorites() {
             <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {placeFavorites.map((place) => {
                 const displayName = formatPlaceName(place.name, place.type);
-
                 const displayType = formatPlaceType(place.type);
 
                 return (

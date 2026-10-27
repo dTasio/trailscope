@@ -1,4 +1,4 @@
-import { runOverpassQuery } from "./overpassClient";
+import { runOverpassQuery } from "./overpassClient.js";
 
 const MIN_TRAIL_DISTANCE_KM = 1;
 const MAX_TRAIL_DISTANCE_KM = 30;
@@ -37,7 +37,7 @@ function getRouteLinesFromWays(ways = []) {
 }
 
 // Obtiene los diferentes valores de una etiqueta presente en los caminos que forman la ruta
-function getUniqueWayTagValues(ways = [],tagName) {
+function getUniqueWayTagValues(ways = [], tagName) {
   if (!Array.isArray(ways)) {
     return [];
   }
@@ -79,150 +79,87 @@ function getRouteCenter(lines) {
   };
 }
 
-// Convierte la distancia de OpenStreetMap a kilómetros numéricos
+// Convierte una distancia de OpenStreetMap a kilómetros
 function normalizeDistanceKm(distanceValue) {
-  if (distanceValue == null) {
-    return null;
-  }
+  if (distanceValue == null) return null;
 
-  const normalizedValue = String(distanceValue)
-    .trim()
-    .toLowerCase()
-    .replace(",", ".");
+  const normalizedValue = String(distanceValue).trim().toLowerCase().replace(",", ".");
+  const match = normalizedValue.match(/^([+-]?\d+(?:\.\d+)?)\s*([a-z]+)?$/);
 
-  const match = normalizedValue.match(/\d+(?:\.\d+)?/);
+  if (!match) return null;
 
-  if (!match) {
-    return null;
-  }
+  const value = Number(match[1]);
+  const unit = match[2] ?? "km";
 
-  const distance = Number(match[0]);
+  if (!Number.isFinite(value) || value < 0) return null;
 
-  if (!Number.isFinite(distance)) {
-    return null;
-  }
+  if (unit === "km") return value;
+  if (unit === "m") return value / 1000;
+  if (unit === "mi") return value * 1.609344;
+  if (unit === "nmi") return value * 1.852;
 
-  return distance;
+  return null;
 }
 
-// Convierte valores de elevación o desnivel a metros numericos
+// Convierte un desnivel de OpenStreetMap a metros
 function normalizeMeters(value) {
-  if (value == null) {
+  if (value == null) return null;
+
+  const normalizedValue = String(value).trim().toLowerCase().replace(",", ".");
+  const match = normalizedValue.match(/^([+-]?\d+(?:\.\d+)?)\s*([a-z]+)?$/);
+
+  if (!match) return null;
+
+  const valueNumber = Number(match[1]);
+  const unit = match[2] ?? "m";
+
+  if (!Number.isFinite(valueNumber)) return null;
+
+  let meters;
+
+  if (unit === "m") {
+    meters = valueNumber;
+  } else if (unit === "km") {
+    meters = valueNumber * 1000;
+  } else if (unit === "mi") {
+    meters = valueNumber * 1609.344;
+  } else {
     return null;
   }
 
-  const normalizedValue = String(value)
-    .trim()
-    .toLowerCase()
-    .replace(",", ".");
-
-  const match =
-    normalizedValue.match(/\d+(?:\.\d+)?/);
-
-  if (!match) {
-    return null;
-  }
-
-  const meters = Number(match[0]);
-
-  return Number.isFinite(meters)
-    ? meters
-    : null;
+  return Math.abs(meters);
 }
 
-// Convierte una relación de OpenStreetMap al formato de ruta utilizado por TrailScope
+// Convierte una relación de OpenStreetMap al formato utilizado por TrailScope
 function normalizeTrail(element, routeWays = []) {
-  const lines =
-  routeWays.length > 0
-    ? getRouteLinesFromWays(routeWays)
-    : getRouteLines(element.members);
-
-  const name = element.tags?.name?.trim() || null;
-
-  const distance = normalizeDistanceKm(
-    element.tags?.distance
-  );
-
-  const geometry =
-    lines.length > 0
-      ? {
-          type: "MultiLineString",
-          coordinates: lines,
-        }
-      : null;
+  const lines = routeWays.length > 0 ? getRouteLinesFromWays(routeWays) : getRouteLines(element.members);
 
   return {
-
-  id: element.id,
-
-  name:
-    element.tags?.name?.trim() || null,
-
-  distance: normalizeDistanceKm(
-    element.tags?.distance
-  ),
-
-  ascent: normalizeMeters(
-    element.tags?.ascent
-  ),
-
-  descent: normalizeMeters(
-    element.tags?.descent
-  ),
-
-  duration:
-    element.tags?.duration?.trim() ?? null,
-
-  description:
-    element.tags?.description?.trim() ?? null,
-
-  from:
-    element.tags?.from?.trim() ?? null,
-
-  to:
-    element.tags?.to?.trim() ?? null,
-
-  website:
-    element.tags?.website?.trim() ?? null,
-
-  wikipedia:
-    element.tags?.wikipedia?.trim() ?? null,
-
-  wikidata:
-    element.tags?.wikidata?.trim() ?? null,
-
-  wikimediaCommons:
-    element.tags?.wikimedia_commons?.trim() ??
-    null,
-
-  image:
-    element.tags?.image?.trim() ?? null,
-
-  surface: getUniqueWayTagValues(
-    routeWays,
-    "surface"
-  ),
-
-  trailVisibility: getUniqueWayTagValues(
-    routeWays,
-    "trail_visibility"
-  ),
-
-  sacScale: getUniqueWayTagValues(
-    routeWays,
-    "sac_scale"
-  ),
-
-  center: getRouteCenter(lines),
-
-  geometry:
-    lines.length > 0
+    id: element.id,
+    name: element.tags?.name?.trim() || null,
+    distance: normalizeDistanceKm(element.tags?.distance),
+    ascent: normalizeMeters(element.tags?.ascent),
+    descent: normalizeMeters(element.tags?.descent),
+    duration: element.tags?.duration?.trim() ?? null,
+    description: element.tags?.description?.trim() ?? null,
+    from: element.tags?.from?.trim() ?? null,
+    to: element.tags?.to?.trim() ?? null,
+    website: element.tags?.website?.trim() ?? null,
+    wikipedia: element.tags?.wikipedia?.trim() ?? null,
+    wikidata: element.tags?.wikidata?.trim() ?? null,
+    wikimediaCommons: element.tags?.wikimedia_commons?.trim() ?? null,
+    image: element.tags?.image?.trim() ?? null,
+    surface: getUniqueWayTagValues(routeWays,"surface"),
+    trailVisibility: getUniqueWayTagValues(routeWays,"trail_visibility"),
+    sacScale: getUniqueWayTagValues(routeWays,"sac_scale"),
+    center: getRouteCenter(lines),
+    geometry: lines.length > 0
       ? {
           type: "MultiLineString",
           coordinates: lines,
         }
       : null,
-};
+  };
 }
 
 // Obtiene rutas de senderismo dentro de una zona concreta del mapa
