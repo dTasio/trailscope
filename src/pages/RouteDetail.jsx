@@ -253,12 +253,6 @@ function RouteDetail() {
 
           {/* Acciones */}
           <div className="mt-6 flex flex-wrap gap-3">
-            {tripSuccessMessage && (
-              <div className="mt-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-800" role="status">
-                ✓ {tripSuccessMessage}
-              </div>
-            )}
-
             <button
               type="button"
               onClick={handleFavorite}
@@ -280,6 +274,12 @@ function RouteDetail() {
               {isTrailCompleted ? "✓ Completada" : "✓ Marcar como completada"}
             </button>
           </div>
+
+          {tripSuccessMessage && (
+            <div className="mt-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-800" role="status">
+              ✓ {tripSuccessMessage}
+            </div>
+          )}
 
           {favoriteError && (
             <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800" role="alert">
