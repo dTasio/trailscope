@@ -6,7 +6,13 @@ TrailScope es una aplicación web para **descubrir rutas de senderismo y lugares
 
 Es un proyecto de portfolio centrado especialmente en **React, frontend visual, consumo de APIs, mapas interactivos y experiencia de usuario**.
 
+## Demo
+
+🌐 **[Ver TrailScope en funcionamiento](https://dtasio.github.io/trailscope/)**
+
 ---
+
+## Capturas
 
 ### Explorar rutas y lugares
 
@@ -19,6 +25,8 @@ Es un proyecto de portfolio centrado especialmente en **React, frontend visual, 
 ### Planificación de una escapada
 
 ![Planificación de una escapada en TrailScope](src/assets/images/screenshots/trip.PNG)
+
+---
 
 ## Funcionalidades
 
@@ -167,6 +175,8 @@ En futuras versiones podrían incorporarse autenticación, base de datos, sincro
 
 ## Estado
 
-**Versión actual:** funcional y en fase final de publicación.
+**Versión actual:** publicada y disponible como proyecto de portfolio.
+
+🌐 **[Abrir TrailScope](https://dtasio.github.io/trailscope/)**
 
 Proyecto desarrollado como parte de mi portfolio personal de desarrollo web.
