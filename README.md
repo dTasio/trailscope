@@ -1,5 +1,3 @@
-# TrailScope
-
 <p align="center">
   <img src="src/assets/images/branding/trailscope-logo.png" alt="TrailScope" width="320" />
 </p>
@@ -9,6 +7,18 @@ TrailScope es una aplicación web para **descubrir rutas de senderismo y lugares
 Es un proyecto de portfolio centrado especialmente en **React, frontend visual, consumo de APIs, mapas interactivos y experiencia de usuario**.
 
 ---
+
+### Explorar rutas y lugares
+
+![Explorar rutas y lugares en TrailScope](src/assets/images/screenshots/explore.PNG)
+
+### Detalle de una ruta
+
+![Detalle de una ruta en TrailScope](src/assets/images/screenshots/routeDetail.PNG)
+
+### Planificación de una escapada
+
+![Planificación de una escapada en TrailScope](src/assets/images/screenshots/trip.PNG)
 
 ## Funcionalidades
 
